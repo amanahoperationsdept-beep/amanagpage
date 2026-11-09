@@ -3,15 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Amanah Health & Wellness - Official Store, AI Assistant & Admin Portal</title>
-  
-  <!-- Tailwind CSS CDN -->
+  <title>Amanah Barakah Green Coffee Mix - Premium Wellness</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- Canvas Confetti -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <script>
@@ -19,7 +14,7 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
           },
           colors: {
             brand: {
@@ -32,17 +27,6 @@
               900: '#14532d',
               gold: '#D4AF37',
               goldDark: '#AA7C11'
-            },
-            amanah: {
-              50: '#f0fdf4',
-              100: '#dcfce7',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-              800: '#166534',
-              900: '#14532d',
-              dark: '#0b2b1a',
-              gold: '#d97706'
             }
           }
         }
@@ -52,19 +36,13 @@
 
   <style>
     html { scroll-behavior: smooth; }
-    
-    /* Custom Scrollbars */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); }
-    ::-webkit-scrollbar-thumb { background: rgba(22, 163, 74, 0.4); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(22, 163, 74, 0.7); }
-
-    .pulse-glow { animation: pulseGlow 2s infinite; }
+    .pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
     @keyframes pulseGlow {
       0%, 100% { box-shadow: 0 0 15px rgba(22, 163, 74, 0.4); }
       50% { box-shadow: 0 0 28px rgba(22, 163, 74, 0.8); }
     }
-    
     .badge-shimmer {
       background: linear-gradient(90deg, #16a34a 0%, #D4AF37 50%, #16a34a 100%);
       background-size: 200% 100%;
@@ -74,34 +52,18 @@
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
-    
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    .chat-bubble-user {
-      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-      border-bottom-right-radius: 2px;
-    }
-    .chat-bubble-agent {
-      background: #ffffff;
-      border-bottom-left-radius: 2px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    .chat-bubble-ai {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-      border-bottom-left-radius: 2px;
-      border: 1px solid #bbf7d0;
-    }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans antialiased pb-24 md:pb-0 selection:bg-emerald-500 selection:text-white">
+<body class="bg-gray-50 text-gray-800 font-sans antialiased pb-24 md:pb-0">
 
   <!-- TOP PROMOTIONAL BANNER -->
   <div id="promo-banner" class="bg-gradient-to-r from-emerald-900 via-green-800 to-emerald-900 text-white text-xs sm:text-sm py-2 px-4 sticky top-0 z-40 shadow-md">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
       <div class="flex items-center gap-2 font-semibold tracking-wide">
-        <span id="promo-badge-tag" class="bg-amber-400 text-emerald-950 px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-wider animate-pulse">SPECIAL BUNDLE OFFER</span>
-        <span id="banner-text-display">BUY 4 PACKS / BOTTLES & GET FREE SHIPPING + SAVE ₱100!</span>
+        <span id="promo-badge-tag" class="bg-amber-400 text-emerald-950 px-2 py-0.5 rounded-md text-xs font-black uppercase tracking-wider animate-pulse">FLASH SALE</span>
+        <span id="banner-text-display">SPECIAL PROMO: Enjoy Up To <span id="promo-discount-text">50% OFF</span> + FREE SHIPPING Nationwide!</span>
       </div>
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1 font-mono font-bold text-amber-300 bg-black/30 px-3 py-1 rounded-full border border-amber-400/30">
@@ -110,8 +72,8 @@
           <span id="timer-minutes">28</span>m :
           <span id="timer-seconds">42</span>s
         </div>
-        <a href="#order-section" class="hidden sm:inline-block bg-amber-400 hover:bg-amber-300 text-emerald-950 font-bold px-3 py-1 rounded-full text-xs transition duration-200 shadow uppercase">
-          Claim Discount
+        <a href="#order-section" class="hidden sm:inline-block bg-amber-400 hover:bg-amber-300 text-emerald-950 font-bold px-3 py-1 rounded-full text-xs transition duration-200 shadow">
+          CLAIM DISCOUNT
         </a>
       </div>
     </div>
@@ -119,88 +81,76 @@
 
   <!-- NAVIGATION BAR -->
   <header class="bg-white border-b border-gray-100 shadow-sm sticky top-[38px] md:top-[36px] z-30">
-    <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">
-        <img src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" alt="Amanah Logo" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-sm" onerror="this.src='https://placehold.co/100x100/16a34a/ffffff?text=Amanah'" />
+    <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" alt="Amanah Logo" class="w-10 h-10 rounded-full object-cover border-2 border-amber-400 shadow-sm" onerror="this.src='https://placehold.co/100x100/16a34a/ffffff?text=Amanah'" />
         <div>
           <span class="font-extrabold text-xl text-emerald-900 tracking-tight leading-none block" id="header-brand-name">AMANAH</span>
           <span class="text-[10px] text-amber-600 font-bold tracking-widest uppercase block">Health & Wellness</span>
         </div>
       </div>
-      
       <div class="flex items-center gap-4">
-        <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600">
-          <a href="#store-section" class="hover:text-emerald-700 transition">Products</a>
+        <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600">
           <a href="#benefits" class="hover:text-emerald-700 transition">Benefits</a>
           <a href="#ingredients" class="hover:text-emerald-700 transition">Ingredients</a>
           <a href="#reviews" class="hover:text-emerald-700 transition">Reviews</a>
           <a href="#faq" class="hover:text-emerald-700 transition">FAQ</a>
-        </nav>
-        
-        <div class="flex items-center gap-2">
-          <button onclick="toggleCustomerChatWidget()" class="text-xs bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-3 py-2 rounded-xl border border-emerald-300 transition flex items-center gap-1.5 shadow-sm">
-            <i class="fa-solid fa-comments text-emerald-600"></i> <span class="hidden sm:inline">AI Support</span>
-          </button>
-          
-          <button onclick="openAdminPortal()" class="text-xs bg-emerald-800 hover:bg-emerald-900 text-amber-300 font-bold px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5">
-            <i class="fa-solid fa-lock text-amber-400"></i> Admin Portal
-          </button>
         </div>
+        <button onclick="toggleAdminModal()" class="text-xs bg-emerald-800 hover:bg-emerald-900 text-amber-300 font-bold px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders text-amber-400"></i> Admin Portal
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- ADMIN AUTHENTICATION / PASSWORD GATE MODAL -->
-  <div id="adminAuthModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl relative border border-emerald-100">
-      <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <div>
-        <h3 class="text-xl font-black text-gray-900">Admin Portal Access</h3>
-        <p class="text-xs text-gray-500 mt-1">Please enter the administrator password to access orders & settings.</p>
-      </div>
-
-      <form onsubmit="verifyAdminPassword(event)" class="space-y-3">
-        <div class="relative">
-          <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" required class="w-full px-4 py-3 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-center font-bold tracking-widest" />
-          <span class="text-[10px] text-gray-400 block mt-1">Default Demo Password: <code class="bg-gray-100 px-1 py-0.5 rounded text-emerald-700 font-mono">amanah2026</code></span>
-        </div>
-        <p id="adminAuthError" class="text-xs font-bold text-red-600 hidden">Incorrect password. Please try again.</p>
-        
-        <div class="flex gap-2">
-          <button type="button" onclick="closeAdminAuthModal()" class="w-1/2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-xs">
-            Cancel
-          </button>
-          <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow">
-            Unlock Portal
-          </button>
-        </div>
-      </form>
+  <!-- HERO BANNER IMAGE PROMOTION -->
+  <div class="max-w-6xl mx-auto px-4 pt-4">
+    <div class="rounded-2xl overflow-hidden shadow-lg border border-emerald-100">
+      <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/banner/Gemini_Generated_Image_2mzmh32mzmh32mzm.jpg" alt="Amanah Special Banner" class="w-full h-auto max-h-[300px] object-cover" onerror="this.style.display='none'" />
     </div>
   </div>
 
   <!-- HERO / PRODUCT SHOWCASE SECTION -->
-  <section id="store-section" class="max-w-7xl mx-auto px-4 py-6 md:py-8">
+  <section class="max-w-6xl mx-auto px-4 py-6 md:py-8">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       
       <!-- LEFT: PRODUCT GALLERY -->
       <div class="lg:col-span-6 space-y-4">
         <div class="relative bg-white p-4 rounded-2xl border border-gray-100 shadow-lg group overflow-hidden">
           <span id="badge-discount-tag" class="absolute top-4 left-4 bg-red-600 text-white font-black text-xs px-3 py-1.5 rounded-full shadow-md z-10 uppercase tracking-wide">
-            SPECIAL BUNDLE SAVINGS
+            50% OFF TODAY
           </span>
           <span class="absolute top-4 right-4 bg-emerald-50 text-emerald-800 font-bold text-xs px-2.5 py-1 rounded-full border border-emerald-200 z-10 flex items-center gap-1">
             <i class="fa-solid fa-shield-halved text-emerald-600"></i> 100% Authentic
           </span>
           <div class="aspect-square w-full max-h-[440px] flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden">
-            <img id="main-product-img" src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494077_w.jpg" alt="Amanah Product Showcase" class="max-h-full max-w-full object-contain transform group-hover:scale-105 transition duration-500" />
+            <img id="main-product-img" src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/887576921_1108057161860628_7668058406210915811_n.jpg" alt="Amanah Product" class="max-h-full max-w-full object-contain transform group-hover:scale-105 transition duration-500" />
           </div>
         </div>
 
         <!-- Thumbnail Carousel -->
-        <div class="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1" id="product-thumbnails-carousel">
-          <!-- Dynamically Populated -->
+        <div class="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1">
+          <button onclick="selectProductImage('https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/887576921_1108057161860628_7668058406210915811_n.jpg', this, 'Amanah Barakah Green Coffee Mix')" class="thumb-btn active border-2 border-emerald-600 rounded-xl p-1 bg-white shadow-sm flex-shrink-0 w-20 h-20 transition">
+            <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/887576921_1108057161860628_7668058406210915811_n.jpg" class="w-full h-full object-contain rounded-lg" alt="Barakah Coffee" />
+          </button>
+          <button onclick="selectProductImage('https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/887197008_4682494992067684_5991264746165178786_n.jpg', this, 'Amanah Baskug Coffee for Men')" class="thumb-btn border-2 border-transparent hover:border-emerald-300 rounded-xl p-1 bg-white shadow-sm flex-shrink-0 w-20 h-20 transition">
+            <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/887197008_4682494992067684_5991264746165178786_n.jpg" class="w-full h-full object-contain rounded-lg" alt="Baskug Coffee" />
+          </button>
+          <button onclick="selectProductImage('https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/893113876_1679708440191602_8341038551087519198_n.jpg', this, 'Amanah Spirulina Superfood')" class="thumb-btn border-2 border-transparent hover:border-emerald-300 rounded-xl p-1 bg-white shadow-sm flex-shrink-0 w-20 h-20 transition">
+            <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/893113876_1679708440191602_8341038551087519198_n.jpg" class="w-full h-full object-contain rounded-lg" alt="Spirulina" />
+          </button>
+          <button onclick="selectProductImage('https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/890117642_1148997020989295_3467624724349696264_n.jpg', this, 'Amanah Serpentina Capsules')" class="thumb-btn border-2 border-transparent hover:border-emerald-300 rounded-xl p-1 bg-white shadow-sm flex-shrink-0 w-20 h-20 transition">
+            <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/890117642_1148997020989295_3467624724349696264_n.jpg" class="w-full h-full object-contain rounded-lg" alt="Serpentina" />
+          </button>
+          <button onclick="selectProductImage('https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/886055358_1655155702722875_3215013923169519230_n.jpg', this, 'Amanah Herbal Rub')" class="thumb-btn border-2 border-transparent hover:border-emerald-300 rounded-xl p-1 bg-white shadow-sm flex-shrink-0 w-20 h-20 transition">
+            <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/886055358_1655155702722875_3215013923169519230_n.jpg" class="w-full h-full object-contain rounded-lg" alt="Amanah Herbal Rub" />
+          </button>
+          <button onclick="selectProductImage('https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/888504248_1466621868762165_4899557489444514165_n.jpg', this, 'Amanah Herbal Oil')" class="thumb-btn border-2 border-transparent hover:border-emerald-300 rounded-xl p-1 bg-white shadow-sm flex-shrink-0 w-20 h-20 transition">
+            <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/888504248_1466621868762165_4899557489444514165_n.jpg" class="w-full h-full object-contain rounded-lg" alt="Amanah Herbal Oil" />
+          </button>
+          <button onclick="selectProductImage('https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/890279795_1489339553040004_9003272516611169250_n.jpg', this, 'Amanah Glutagen Cee')" class="thumb-btn border-2 border-transparent hover:border-emerald-300 rounded-xl p-1 bg-white shadow-sm flex-shrink-0 w-20 h-20 transition">
+            <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/Products/890279795_1489339553040004_9003272516611169250_n.jpg" class="w-full h-full object-contain rounded-lg" alt="Glutagen Cee" />
+          </button>
         </div>
 
         <!-- Trust Badges -->
@@ -208,7 +158,7 @@
           <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
             <i class="fa-solid fa-truck-fast text-emerald-600 text-xl mb-1"></i>
             <p class="text-xs font-bold text-gray-800">Cash On Delivery</p>
-            <p class="text-[10px] text-gray-500">Pay upon item delivery</p>
+            <p class="text-[10px] text-gray-500">Pay when order arrives</p>
           </div>
           <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
             <i class="fa-solid fa-leaf text-emerald-600 text-xl mb-1"></i>
@@ -236,24 +186,24 @@
             </div>
             <span class="text-xs font-bold text-gray-700">4.9 / 5.0</span>
             <span class="text-xs text-gray-400">|</span>
-            <span class="text-xs font-semibold text-emerald-700 underline cursor-pointer" onclick="document.getElementById('reviews').scrollIntoView()">1,420 Verified Customer Reviews</span>
+            <span class="text-xs font-semibold text-emerald-700 underline cursor-pointer" onclick="document.getElementById('reviews').scrollIntoView()">1,420 Verified Reviews</span>
           </div>
           <h1 id="product-title-display" class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
-            Amanah Barakah Green Coffee Mix
+            Amanah Barakah Green Coffee Mix (10 Sachets / Pack)
           </h1>
           <p id="product-desc-display" class="text-sm text-gray-600 mt-2 leading-relaxed">
-            Nature’s finest premium herbal coffee blend loaded with Green Coffee Beans, Garcinia Cambogia, L-Carnitine, Mangosteen, Barley & Green Tea. Formulated to boost natural energy and promote metabolic balance.
+            Nature’s finest premium herbal coffee blend loaded with Green Coffee Beans, Garcinia Cambogia, L-Carnitine, Mangosteen, Barley & Green Tea. Formulated to boost natural energy, support weight management, and promote overall metabolic balance.
           </p>
         </div>
 
         <!-- STOCK & PRICING BOX -->
         <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <span class="text-xs uppercase font-bold text-emerald-800 tracking-wider block">Standard Price (SRP):</span>
+            <span class="text-xs uppercase font-bold text-emerald-800 tracking-wider">Promo Price:</span>
             <div class="flex items-baseline gap-2">
-              <span id="display-promo-price" class="text-3xl font-black text-emerald-700">₱450</span>
-              <span id="display-orig-price" class="text-sm text-gray-400 line-through">₱550</span>
-              <span id="save-percentage-badge" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">SPECIAL OFFER</span>
+              <span id="display-promo-price" class="text-3xl font-black text-emerald-700">₱600</span>
+              <span id="display-orig-price" class="text-sm text-gray-400 line-through">₱1,200</span>
+              <span id="save-percentage-badge" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">SAVE 50%</span>
             </div>
           </div>
           <div class="text-right">
@@ -267,14 +217,29 @@
 
         <!-- QUICK BENEFITS BULLETS -->
         <div id="quick-bullets-container" class="space-y-2 text-sm text-gray-700">
-          <!-- Dynamic bullets -->
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><strong>Boosts Metabolism & Energy:</strong> Natural green coffee bean power.</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><strong>Supports Weight Management:</strong> With Garcinia & L-Carnitine.</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><strong>Antioxidant Protection:</strong> Mangosteen & Grape Seed extracts.</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span><strong>No Preservatives:</strong> 100% natural organic ingredients.</span>
+          </div>
         </div>
 
         <!-- ACTION BUTTON -->
         <div class="pt-2">
           <a href="#order-section" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-lg py-4 px-6 rounded-2xl shadow-lg hover:shadow-xl transition duration-200 flex items-center justify-center gap-3 pulse-glow">
             <i class="fa-solid fa-cart-shopping"></i>
-            <span>ORDER BUNDLE NOW - CASH ON DELIVERY</span>
+            <span>ORDER NOW - CASH ON DELIVERY</span>
           </a>
           <p class="text-center text-xs text-gray-500 mt-2 flex items-center justify-center gap-2">
             <i class="fa-solid fa-lock text-emerald-600"></i> Secure Checkout • No Credit Card Required
@@ -287,22 +252,46 @@
 
   <!-- INGREDIENT HIGHLIGHT BANNER -->
   <section id="ingredients" class="bg-gradient-to-b from-white to-emerald-50/50 py-12 border-y border-emerald-100">
-    <div class="max-w-7xl mx-auto px-4">
+    <div class="max-w-6xl mx-auto px-4">
       <div class="text-center max-w-2xl mx-auto mb-10">
-        <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-widest">Super Formulation</span>
-        <h2 id="ingredients-title" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">Active Natural Ingredients</h2>
-        <p class="text-sm text-gray-600 mt-1">Carefully selected natural superfoods designed for maximum synergy and overall body wellness.</p>
+        <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-widest">Super Ingredients</span>
+        <h2 id="ingredients-title" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">10 Powerful Natural Ingredients in 1 Cup</h2>
+        <p class="text-sm text-gray-600 mt-1">Carefully selected natural superfoods designed for maximum synergy and wellness.</p>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="ingredients-grid">
-        <!-- Dynamically Injected -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 text-xl">🌱</div>
+          <h4 class="font-bold text-xs text-gray-800">Green Coffee Beans</h4>
+          <p class="text-[11px] text-gray-500 mt-0.5">Rich in Chlorogenic Acid for weight balance</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 text-xl">🍈</div>
+          <h4 class="font-bold text-xs text-gray-800">Garcinia Cambogia</h4>
+          <p class="text-[11px] text-gray-500 mt-0.5">Helps curb appetite and block fat production</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 text-xl">⚡</div>
+          <h4 class="font-bold text-xs text-gray-800">L-Carnitine</h4>
+          <p class="text-[11px] text-gray-500 mt-0.5">Converts fatty acids into clean cellular energy</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 text-xl">🥭</div>
+          <h4 class="font-bold text-xs text-gray-800">Mangosteen</h4>
+          <p class="text-[11px] text-gray-500 mt-0.5">Potent Xanthones for cellular antioxidant boost</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition">
+          <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 text-xl">🌾</div>
+          <h4 class="font-bold text-xs text-gray-800">Barley Extract</h4>
+          <p class="text-[11px] text-gray-500 mt-0.5">Rich in fiber and digestion-supporting nutrients</p>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- WHY CHOOSE AMANAH / BENEFITS -->
   <section id="benefits" class="py-12 bg-white">
-    <div class="max-w-7xl mx-auto px-4">
+    <div class="max-w-6xl mx-auto px-4">
       <div class="text-center max-w-2xl mx-auto mb-10">
         <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-widest">Health Transformation</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">Why Thousands Trust Amanah Herbal Products</h2>
@@ -317,7 +306,7 @@
         <div class="p-6 rounded-2xl bg-emerald-50/50 border border-emerald-100 space-y-3">
           <div class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl font-bold">2</div>
           <h3 class="text-lg font-bold text-gray-900">Metabolic & Digestive Support</h3>
-          <p class="text-sm text-gray-600">Contains high fiber from natural herbs and active enzymes that support smooth digestion and bloating relief.</p>
+          <p class="text-sm text-gray-600">Contains high fiber from barley and active enzymes that support smooth digestion and bloating relief.</p>
         </div>
         <div class="p-6 rounded-2xl bg-emerald-50/50 border border-emerald-100 space-y-3">
           <div class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl font-bold">3</div>
@@ -330,7 +319,7 @@
 
   <!-- CUSTOMER REVIEWS SECTION -->
   <section id="reviews" class="py-12 bg-gray-50 border-t border-gray-200">
-    <div class="max-w-7xl mx-auto px-4">
+    <div class="max-w-6xl mx-auto px-4">
       <div class="text-center max-w-2xl mx-auto mb-10">
         <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-widest">Real Customer Feedback</span>
         <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-2">What Our Customers Are Saying</h2>
@@ -347,7 +336,7 @@
       </div>
 
       <div id="reviews-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Injected via JS -->
+        <!-- Dynamic Reviews Injected via JS -->
       </div>
     </div>
   </section>
@@ -360,13 +349,78 @@
         <span class="badge-shimmer text-white text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-wider inline-block mb-3 shadow">
           SPECIAL PROMOTIONAL PACKAGE SELECTION
         </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900" id="checkout-bundle-heading">Step 1: Choose Your Package</h2>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900">Step 1: Choose Your Package</h2>
         <p class="text-sm text-gray-600 mt-1">Select your bundle below to unlock maximum discounts & free nationwide delivery!</p>
       </div>
 
       <!-- STEP 1: PACKAGE SELECTION CARDS -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12" id="bundle-cards-container">
-        <!-- Dynamically Injected Package Bundle Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        
+        <!-- PACKAGE 1 -->
+        <div id="pkg-card-1" onclick="selectPackage(1)" class="pkg-card relative bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-md cursor-pointer hover:border-emerald-500 transition duration-200">
+          <div class="text-center">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">STARTER PACK</span>
+            <h3 class="text-xl font-extrabold text-gray-900" id="pkg-title-1">Buy 1 Pack</h3>
+            <p class="text-xs text-gray-500 mt-1">10 Sachets / Try Out Pack</p>
+            <div class="my-4">
+              <span id="pkg-price-1" class="text-3xl font-black text-emerald-700">₱600</span>
+              <span class="text-xs text-gray-400 block mt-1">+ Standard Shipping Fee ₱100</span>
+            </div>
+            <div class="py-2 px-3 bg-gray-50 rounded-lg text-xs font-medium text-gray-600">
+              Total: <span id="pkg-total-1" class="font-bold text-gray-800">₱700</span>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100 text-left space-y-1.5 text-xs text-gray-600">
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600"></i> 1x Barakah Green Coffee</div>
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600"></i> Cash On Delivery</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PACKAGE 2 (RECOMMENDED) -->
+        <div id="pkg-card-2" onclick="selectPackage(2)" class="pkg-card relative bg-white rounded-2xl p-6 border-2 border-emerald-600 shadow-xl cursor-pointer ring-2 ring-emerald-500/20 transform md:-translate-y-2 transition duration-200">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-emerald-950 text-[11px] font-black px-4 py-1 rounded-full shadow uppercase tracking-wider">
+            ★ MOST POPULAR & BEST VALUE
+          </div>
+          <div class="text-center pt-2">
+            <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider block mb-1">DUO SAVER PACK</span>
+            <h3 class="text-xl font-extrabold text-gray-900" id="pkg-title-2">Buy 2 Packs</h3>
+            <p class="text-xs text-emerald-600 font-medium mt-1">20 Sachets / Complete 20-Day Supply</p>
+            <div class="my-4">
+              <span id="pkg-price-2" class="text-3xl font-black text-emerald-700">₱1,050</span>
+              <span class="text-xs text-emerald-600 font-bold block mt-1">FREE SHIPPING (Save ₱100)</span>
+            </div>
+            <div class="py-2 px-3 bg-emerald-50 rounded-lg text-xs font-bold text-emerald-800">
+              Total: <span id="pkg-total-2">₱1,050</span>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100 text-left space-y-1.5 text-xs text-gray-600">
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> 2x Barakah Green Coffee</div>
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> FREE Shipping Nationwide</div>
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Cash On Delivery</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PACKAGE 3 -->
+        <div id="pkg-card-3" onclick="selectPackage(3)" class="pkg-card relative bg-white rounded-2xl p-6 border-2 border-gray-200 shadow-md cursor-pointer hover:border-emerald-500 transition duration-200">
+          <div class="text-center">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">FAMILY BUNDLE</span>
+            <h3 class="text-xl font-extrabold text-gray-900" id="pkg-title-3">Buy 3 Packs</h3>
+            <p class="text-xs text-gray-500 mt-1">30 Sachets / Ultimate Savings</p>
+            <div class="my-4">
+              <span id="pkg-price-3" class="text-3xl font-black text-emerald-700">₱1,450</span>
+              <span class="text-xs text-emerald-600 font-bold block mt-1">FREE SHIPPING (Save ₱350)</span>
+            </div>
+            <div class="py-2 px-3 bg-gray-50 rounded-lg text-xs font-medium text-gray-600">
+              Total: <span id="pkg-total-3" class="font-bold text-gray-800">₱1,450</span>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100 text-left space-y-1.5 text-xs text-gray-600">
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600"></i> 3x Barakah Green Coffee</div>
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600"></i> FREE Shipping Nationwide</div>
+              <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600"></i> VIP Priority Delivery</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- STEP 2: CUSTOMER CHECKOUT FORM -->
@@ -378,7 +432,7 @@
           </div>
           <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-right">
             <span class="text-[11px] font-bold text-emerald-800 block">Selected Package:</span>
-            <span id="summary-selected-pkg" class="text-sm font-black text-emerald-700">Buy 4 Packs (₱1,700)</span>
+            <span id="summary-selected-pkg" class="text-sm font-black text-emerald-700">Buy 2 Packs (₱1,050)</span>
           </div>
         </div>
 
@@ -458,8 +512,8 @@
           <!-- ORDER SUMMARY BREAKDOWN -->
           <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-2 text-sm">
             <div class="flex justify-between text-gray-600">
-              <span>Subtotal (<span id="summary-item-qty">4</span> items):</span>
-              <span id="summary-subtotal" class="font-bold text-gray-800">₱1,700</span>
+              <span>Subtotal (<span id="summary-item-qty">2</span> Packs):</span>
+              <span id="summary-subtotal" class="font-bold text-gray-800">₱1,050</span>
             </div>
             <div class="flex justify-between text-gray-600">
               <span>Shipping Fee:</span>
@@ -467,7 +521,7 @@
             </div>
             <div class="border-t border-gray-200 pt-2 flex justify-between text-base font-black text-gray-900">
               <span>Grand Total Amount:</span>
-              <span id="summary-grand-total" class="text-emerald-700 text-xl">₱1,700</span>
+              <span id="summary-grand-total" class="text-emerald-700 text-xl">₱1,050</span>
             </div>
           </div>
 
@@ -498,10 +552,10 @@
 
   <!-- FOOTER -->
   <footer class="bg-gray-900 text-gray-400 py-10 text-xs border-t border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
       <div class="space-y-3">
         <div class="flex items-center gap-2">
-          <img src="https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" alt="Amanah Logo" class="w-8 h-8 rounded-full border border-amber-400 object-cover" />
+          <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" alt="Amanah Logo" class="w-8 h-8 rounded-full border border-amber-400 object-cover" />
           <span class="text-white font-bold text-base" id="footer-brand-title">Amanah Distribution</span>
         </div>
         <p class="text-gray-400 leading-relaxed">Providing high-quality, 100% natural herbal wellness supplements aimed at promoting healthy lifestyles and metabolic balance.</p>
@@ -526,121 +580,20 @@
         </p>
       </div>
     </div>
-    <div class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-gray-800 text-center text-gray-500">
+    <div class="max-w-6xl mx-auto px-4 mt-8 pt-6 border-t border-gray-800 text-center text-gray-500">
       © <span id="year-copy">2026</span> Amanah Health & Wellness. All rights reserved.
     </div>
   </footer>
 
   <!-- STICKY MOBILE ORDER BUTTON -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-30 md:hidden shadow-2xl flex items-center justify-between gap-3">
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-40 md:hidden shadow-2xl flex items-center justify-between gap-3">
     <div>
-      <span class="text-[10px] text-gray-500 block">Bundle Price:</span>
-      <span class="text-lg font-black text-emerald-700" id="sticky-price-mobile">₱1,700</span>
+      <span class="text-[10px] text-gray-500 block">Promo Price:</span>
+      <span class="text-lg font-black text-emerald-700" id="sticky-price-mobile">₱1,050</span>
     </div>
     <a href="#order-section" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm py-3 px-4 rounded-xl shadow-md text-center flex items-center justify-center gap-2">
       <i class="fa-solid fa-cart-shopping"></i> ORDER NOW (COD)
     </a>
-  </div>
-
-  <!-- FLOATING CUSTOMER CHAT WIDGET CONTAINER -->
-  <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-    
-    <!-- Expanded Customer Messaging Window -->
-    <div id="customerChatWindow" class="hidden w-[90vw] sm:w-[380px] h-[520px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden mb-4 transition-all duration-300">
-        
-        <!-- Chat Header -->
-        <div class="bg-gradient-to-r from-emerald-900 to-emerald-700 p-4 text-white flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-full bg-white text-emerald-800 flex items-center justify-center font-bold text-lg shadow-inner">
-                    <i class="fa-solid fa-leaf"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-sm tracking-wide text-amber-300">Amanah AI Support</h4>
-                    <div class="flex items-center space-x-1.5 text-[11px] text-emerald-200">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Online | AI Auto-Response</span>
-                    </div>
-                </div>
-            </div>
-            <button onclick="closeCustomerChatWidget()" class="text-emerald-200 hover:text-white p-1 rounded-lg">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-        </div>
-
-        <!-- Setup Screen (If name/email not provided) -->
-        <div id="customerAuthScreen" class="p-6 flex-1 flex flex-col justify-center space-y-4 bg-slate-50 text-slate-800">
-            <div class="text-center space-y-1">
-                <h5 class="font-bold text-base text-slate-800">Welcome to Amanah Support!</h5>
-                <p class="text-xs text-slate-500">Please enter your details to start real-time messaging with our AI & support team.</p>
-            </div>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Your Full Name</label>
-                    <input type="text" id="custInputName" placeholder="e.g. Juan Dela Cruz" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
-                    <input type="email" id="custInputEmail" placeholder="juan@example.com" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <button onclick="initCustomerSession()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-xs shadow transition">
-                    Start Conversation
-                </button>
-            </div>
-        </div>
-
-        <!-- Active Chat Screen -->
-        <div id="customerActiveScreen" class="hidden flex-1 flex flex-col min-h-0 bg-slate-100">
-            <!-- Message Stream -->
-            <div id="customerMessagesStream" class="flex-1 p-3 overflow-y-auto space-y-2.5">
-                <!-- Populated dynamically -->
-            </div>
-
-            <!-- Typing Indicator -->
-            <div id="customerTypingIndicator" class="px-3 py-1 text-[11px] text-slate-500 italic hidden flex items-center space-x-1.5">
-                <span class="flex space-x-1">
-                    <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce"></span>
-                    <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                    <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                </span>
-                <span>Amanah AI / Support is typing...</span>
-            </div>
-
-            <!-- Input Box -->
-            <div class="p-2.5 bg-white border-t border-slate-200">
-                <!-- Quick Chips -->
-                <div class="flex space-x-1 overflow-x-auto pb-2 text-[11px] no-scrollbar">
-                    <button onclick="sendQuickChip('How to get Buy 4 Free Shipping promo?')" class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap hover:bg-emerald-100">Buy 4 Promo?</button>
-                    <button onclick="sendQuickChip('How much is Baskug Coffee?')" class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap hover:bg-emerald-100">Baskug Price?</button>
-                    <button onclick="sendQuickChip('Where can I order?')" class="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap hover:bg-emerald-100">Where to Order?</button>
-                </div>
-
-                <div class="flex items-center space-x-1.5">
-                    <button onclick="triggerFileInput('customerFile')" class="text-slate-400 hover:text-emerald-600 p-1.5 rounded hover:bg-slate-100" title="Attach image or file">
-                        <i class="fa-solid fa-paperclip text-sm"></i>
-                    </button>
-                    <input type="file" id="customerFile" class="hidden" onchange="handleFileSelect(event, 'customer')">
-                    
-                    <input type="text" id="customerMessageInput" onkeypress="handleKeyPress(event, 'customer')" placeholder="Type your message..." class="flex-1 text-slate-800 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    
-                    <button onclick="sendCustomerMessage()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg font-bold text-xs shadow transition">
-                        <i class="fa-solid fa-paper-plane text-xs"></i>
-                    </button>
-                </div>
-
-                <!-- Customer Attachment Preview -->
-                <div id="customerAttachmentPreview" class="hidden mt-1.5 text-[11px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 flex items-center justify-between">
-                    <span id="customerAttachmentName"><i class="fa-solid fa-file mr-1"></i> attached.jpg</span>
-                    <button onclick="removeAttachment('customer')" class="text-red-500 hover:text-red-700 font-bold">&times;</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Floating Launcher Trigger Button -->
-    <button id="floatingChatBtn" onclick="toggleCustomerChatWidget()" class="w-14 h-14 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl border-2 border-amber-400 transition transform hover:scale-105 active:scale-95 group relative">
-        <i id="floatingChatIcon" class="fa-solid fa-comments"></i>
-        <span id="custUnreadBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">1</span>
-    </button>
   </div>
 
   <!-- ORDER SUCCESS MODAL -->
@@ -650,7 +603,7 @@
         <i class="fa-solid fa-circle-check"></i>
       </div>
       <h3 class="text-2xl font-black text-gray-900">Order Confirmed!</h3>
-      <p class="text-xs text-gray-600">Thank you for ordering from Amanah Health & Wellness. We have received your order and our dispatch team will contact you shortly.</p>
+      <p class="text-xs text-gray-600">Thank you for ordering Amanah Health Supplement. We have received your order and our dispatch team will contact you shortly.</p>
       
       <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-left space-y-2 text-xs">
         <div class="flex justify-between border-b border-emerald-100 pb-1.5">
@@ -671,7 +624,7 @@
         </div>
         <div class="flex justify-between text-sm pt-1">
           <span class="font-bold text-gray-700">Total Payable:</span>
-          <span id="modal-cust-total" class="font-black text-emerald-700 text-base">₱1,700</span>
+          <span id="modal-cust-total" class="font-black text-emerald-700 text-base">₱1,050</span>
         </div>
       </div>
 
@@ -692,30 +645,19 @@
             <i class="fa-solid fa-sliders"></i>
           </div>
           <div>
-            <h3 class="font-extrabold text-lg leading-tight flex items-center gap-2">
-              Amanah Master Control & Admin Portal
-              <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Authenticated</span>
-            </h3>
-            <p class="text-xs text-gray-400">Edit landing page, view orders, manage live chats & AI knowledge base</p>
+            <h3 class="font-extrabold text-lg leading-tight">Amanah Master Control & Admin Portal</h3>
+            <p class="text-xs text-gray-400">Edit any landing page section, pricing, timer & customer orders</p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="lockAdminPortal()" class="text-xs bg-red-900/60 hover:bg-red-800 text-red-200 border border-red-700/50 font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1">
-            <i class="fa-solid fa-lock text-xs"></i> Lock Portal
-          </button>
-          <button onclick="toggleAdminModal()" class="text-gray-400 hover:text-white p-2 text-xl">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
+        <button onclick="toggleAdminModal()" class="text-gray-400 hover:text-white p-2 text-xl">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
       <!-- Admin Tabs Navigation -->
       <div class="bg-gray-100 border-b border-gray-200 px-4 py-2 flex items-center gap-2 text-xs font-bold text-gray-600 overflow-x-auto no-scrollbar">
         <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="px-4 py-2.5 rounded-xl bg-white text-emerald-700 shadow-sm flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-list-check"></i> Orders (<span id="admin-orders-count">0</span>)
-        </button>
-        <button onclick="switchAdminTab('chats')" id="tab-btn-chats" class="px-4 py-2.5 rounded-xl hover:bg-white/60 flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-comments"></i> Live Chats (<span id="admin-chats-unread-count" class="bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[10px]">1</span>)
         </button>
         <button onclick="switchAdminTab('hero')" id="tab-btn-hero" class="px-4 py-2.5 rounded-xl hover:bg-white/60 flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-heading"></i> Banner & Hero Editor
@@ -727,7 +669,7 @@
           <i class="fa-solid fa-star"></i> Reviews Editor
         </button>
         <button onclick="switchAdminTab('faqs')" id="tab-btn-faqs" class="px-4 py-2.5 rounded-xl hover:bg-white/60 flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-circle-question"></i> FAQs & Knowledge Base
+          <i class="fa-solid fa-circle-question"></i> FAQs Editor
         </button>
       </div>
 
@@ -789,107 +731,7 @@
           </div>
         </div>
 
-        <!-- 2. LIVE CHATS TAB (INTEGRATED AUTO MESSAGE SYSTEM) -->
-        <div id="admin-tab-chats" class="space-y-4 hidden h-full">
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row h-[600px]">
-            <!-- Left Column: Conversations List -->
-            <div class="md:w-1/3 border-r border-slate-200 flex flex-col bg-slate-50">
-                <div class="p-3 border-b border-slate-200 space-y-2">
-                    <div class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                        <input type="text" id="adminSearchChatInput" onkeyup="filterConversations()" placeholder="Search customer..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    </div>
-                    <div class="flex items-center justify-between text-xs">
-                        <select id="filterChatStatus" onchange="filterConversations()" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs">
-                            <option value="all">All Statuses</option>
-                            <option value="active" selected>Active / Open</option>
-                            <option value="unread">Unread Only</option>
-                            <option value="resolved">Resolved</option>
-                        </select>
-                        <button onclick="simulateIncomingCustomerMsg()" class="text-xs bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-semibold px-2 py-1 rounded border border-emerald-300">
-                            + Sim Query
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Conversation List -->
-                <div id="conversationList" class="flex-1 overflow-y-auto divide-y divide-slate-200">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- Right Column: Chat Room Panel -->
-            <div class="md:w-2/3 flex flex-col bg-white">
-                <div id="noChatSelected" class="hidden flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400">
-                    <i class="fa-regular fa-comments text-5xl mb-3 text-slate-300"></i>
-                    <p class="font-medium text-slate-600">Select a conversation to view details</p>
-                </div>
-
-                <div id="activeChatRoom" class="flex-1 flex flex-col min-h-0">
-                    <!-- Chat Header -->
-                    <div class="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="relative">
-                                <div id="chatAvatar" class="w-10 h-10 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">JD</div>
-                                <span id="chatOnlineBadge" class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white"></span>
-                            </div>
-                            <div>
-                                <div class="flex items-center space-x-2">
-                                    <h3 id="chatCustomerName" class="font-bold text-slate-800 text-sm">Juan Dela Cruz</h3>
-                                    <span id="chatStatusBadge" class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-semibold">Active</span>
-                                </div>
-                                <p id="chatCustomerEmail" class="text-xs text-slate-500">juan.delacruz@gmail.com</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center space-x-2">
-                            <button onclick="toggleResolveStatus()" id="btnResolveToggle" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded transition">
-                                <span id="btnResolveText">Resolve</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Messages Stream -->
-                    <div id="adminMessagesStream" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/50">
-                        <!-- Populated by JS -->
-                    </div>
-
-                    <!-- Typing Indicator -->
-                    <div id="adminTypingIndicator" class="px-4 py-1 text-xs text-slate-400 italic hidden flex items-center space-x-2">
-                        <span class="flex space-x-1">
-                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
-                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                            <span class="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-                        </span>
-                        <span>Customer is typing...</span>
-                    </div>
-
-                    <!-- Admin Input Box -->
-                    <div class="p-3 bg-white border-t border-slate-200">
-                        <div class="flex items-center space-x-2">
-                            <button onclick="triggerFileInput('adminFile')" class="text-slate-400 hover:text-emerald-600 p-2 rounded hover:bg-slate-100">
-                                <i class="fa-solid fa-paperclip text-sm"></i>
-                            </button>
-                            <input type="file" id="adminFile" class="hidden" onchange="handleFileSelect(event, 'admin')">
-                            
-                            <input type="text" id="adminMessageInput" onkeypress="handleKeyPress(event, 'admin')" placeholder="Type official response..." class="flex-1 bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            
-                            <button onclick="sendAdminReply()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-semibold text-xs transition shadow flex items-center space-x-1">
-                                <span>Send</span>
-                                <i class="fa-solid fa-paper-plane text-xs"></i>
-                            </button>
-                        </div>
-                        <div id="adminAttachmentPreview" class="hidden mt-2 text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200 flex items-center justify-between">
-                            <span id="adminAttachmentName"><i class="fa-solid fa-file mr-1"></i> attached.jpg</span>
-                            <button onclick="removeAttachment('admin')" class="text-red-500 font-bold">&times;</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. HERO & BANNER EDITOR TAB -->
+        <!-- 2. HERO & BANNER EDITOR TAB -->
         <div id="admin-tab-hero" class="space-y-6 hidden">
           <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
             <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Top Banner & Hero Section Settings</h4>
@@ -897,17 +739,33 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">Promo Banner Announcement Text</label>
-                <input type="text" id="admin-banner-text" value="BUY 4 PACKS / BOTTLES & GET FREE SHIPPING + SAVE ₱100!" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm" />
+                <input type="text" id="admin-banner-text" value="SPECIAL PROMO: Enjoy Up To 50% OFF + FREE SHIPPING Nationwide!" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm" />
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-600 mb-1">Badge Tag Text</label>
-                <input type="text" id="admin-badge-text" value="SPECIAL BUNDLE OFFER" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm" />
+                <input type="text" id="admin-badge-text" value="FLASH SALE" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-gray-600 mb-1">Product Title</label>
+                <input type="text" id="admin-product-title" value="Amanah Barakah Green Coffee Mix (10 Sachets / Pack)" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm font-semibold" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-gray-600 mb-1">Product Description</label>
+                <textarea id="admin-product-desc" rows="3" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm">Nature’s finest premium herbal coffee blend loaded with Green Coffee Beans, Garcinia Cambogia, L-Carnitine, Mangosteen, Barley & Green Tea. Formulated to boost natural energy, support weight management, and promote overall metabolic balance.</textarea>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">Current Stock Count</label>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Single Promo Price (₱)</label>
+                <input type="number" id="admin-hero-promo-price" value="600" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm font-bold text-emerald-700" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Single Original Price (₱)</label>
+                <input type="number" id="admin-hero-orig-price" value="1200" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">Stock Count</label>
                 <input type="number" id="admin-hero-stock" value="142" class="w-full px-3 py-2 rounded-xl border border-gray-300 text-sm" />
               </div>
             </div>
@@ -936,24 +794,68 @@
           </div>
         </div>
 
-        <!-- 4. PACKAGES & PRICING TAB -->
+        <!-- 3. PACKAGES & PRICING TAB -->
         <div id="admin-tab-packages" class="space-y-6 hidden">
           <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-            <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Product Catalogue SRP & Promo Discount Configuration</h4>
+            <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Manage 3 Bundle Packages & Pricing</h4>
             
-            <p class="text-xs text-gray-500">Active promo bundles automatically apply <strong>Save ₱100 + FREE Shipping</strong> on all 4-unit orders matching official posters.</p>
+            <div class="space-y-4">
+              <!-- Package 1 Config -->
+              <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700">Package 1 Title</label>
+                  <input type="text" id="admin-pkg1-title" value="Buy 1 Pack" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700">Price (₱)</label>
+                  <input type="number" id="admin-price-pkg1" value="600" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700">Shipping Fee (₱)</label>
+                  <input type="number" id="admin-ship-pkg1" value="100" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
+                </div>
+              </div>
 
-            <div class="space-y-3" id="admin-product-pricing-list">
-              <!-- Dynamically populated pricing controls for each product -->
+              <!-- Package 2 Config -->
+              <div class="p-4 bg-emerald-50/70 rounded-xl border border-emerald-200 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                <div>
+                  <label class="block text-xs font-bold text-emerald-900">Package 2 Title (Best Value)</label>
+                  <input type="text" id="admin-pkg2-title" value="Buy 2 Packs" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-emerald-900">Price (₱)</label>
+                  <input type="number" id="admin-price-pkg2" value="1050" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-bold text-emerald-800" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-emerald-900">Shipping Fee (0 = Free)</label>
+                  <input type="number" id="admin-ship-pkg2" value="0" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
+                </div>
+              </div>
+
+              <!-- Package 3 Config -->
+              <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700">Package 3 Title</label>
+                  <input type="text" id="admin-pkg3-title" value="Buy 3 Packs" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700">Price (₱)</label>
+                  <input type="number" id="admin-price-pkg3" value="1450" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700">Shipping Fee (0 = Free)</label>
+                  <input type="number" id="admin-ship-pkg3" value="0" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
+                </div>
+              </div>
             </div>
 
-            <button onclick="saveAdminPricing()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow">
-              <i class="fa-solid fa-floppy-disk mr-1"></i> Save Product Pricing
+            <button onclick="saveAdminSettings()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Save Package Pricing
             </button>
           </div>
         </div>
 
-        <!-- 5. REVIEWS EDITOR TAB -->
+        <!-- 4. REVIEWS EDITOR TAB -->
         <div id="admin-tab-reviews" class="space-y-6 hidden">
           <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
             <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Add / Edit Customer Reviews</h4>
@@ -983,59 +885,26 @@
           </div>
         </div>
 
-        <!-- 6. FAQS & KNOWLEDGE BASE EDITOR TAB -->
+        <!-- 5. FAQS EDITOR TAB -->
         <div id="admin-tab-faqs" class="space-y-6 hidden">
-          <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
-            <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">FAQs & Gemini AI Knowledge Base</h4>
+          <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
+            <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Add / Edit FAQ Items</h4>
 
-            <!-- FAQ Section -->
-            <div class="space-y-4">
-              <form onsubmit="addNewFaqAdmin(event)" class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                <h5 class="text-xs font-bold text-gray-700 uppercase">Add New Store FAQ Question</h5>
-                <input type="text" id="new-faq-q" placeholder="Question (e.g. Is COD available in Mindanao?)" required class="w-full px-3 py-2 rounded-lg border text-xs" />
-                <textarea id="new-faq-a" rows="2" placeholder="Answer text..." required class="w-full px-3 py-2 rounded-lg border text-xs"></textarea>
-                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow">
-                  + Add FAQ Item
-                </button>
-              </form>
+            <form onsubmit="addNewFaqAdmin(event)" class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <h5 class="text-xs font-bold text-gray-700 uppercase">Add New FAQ Question</h5>
+              <input type="text" id="new-faq-q" placeholder="Question (e.g. Is COD available in Mindanao?)" required class="w-full px-3 py-2 rounded-lg border text-xs" />
+              <textarea id="new-faq-a" rows="2" placeholder="Answer text..." required class="w-full px-3 py-2 rounded-lg border text-xs"></textarea>
+              <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow">
+                + Add FAQ Item
+              </button>
+            </form>
 
-              <div class="space-y-2">
-                <h5 class="text-xs font-bold text-gray-700 uppercase">Current Store FAQ Items</h5>
-                <div id="admin-faqs-list" class="space-y-2">
-                  <!-- Injected via JS -->
-                </div>
+            <div class="space-y-2">
+              <h5 class="text-xs font-bold text-gray-700 uppercase">Current FAQ Items</h5>
+              <div id="admin-faqs-list" class="space-y-2">
+                <!-- Injected via JS -->
               </div>
             </div>
-
-            <!-- AI Knowledge Base & Keyword Rules Section -->
-            <div class="border-t border-gray-200 pt-6 space-y-4">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h5 class="font-bold text-sm text-gray-900">AI Knowledge Base & Keyword Rules</h5>
-                  <p class="text-xs text-gray-500">Gemini AI engine grounds automated responses on these entries.</p>
-                </div>
-                <button onclick="openKbModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow">
-                  + Add KB Item
-                </button>
-              </div>
-
-              <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                <table class="w-full text-left border-collapse text-xs">
-                  <thead class="bg-gray-100 text-gray-600 font-semibold border-b border-gray-200">
-                    <tr>
-                      <th class="p-3">Category</th>
-                      <th class="p-3">Question / Topic</th>
-                      <th class="p-3">Official Answer</th>
-                      <th class="p-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="kbTableBody" class="divide-y divide-gray-200">
-                    <!-- Populated by JS -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
           </div>
         </div>
 
@@ -1043,810 +912,24 @@
     </div>
   </div>
 
-  <!-- AUDIO SIMULATION FOR NEW MESSAGES -->
-  <audio id="notifSound" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    // ADMIN PASSWORD AUTHENTICATION STATE
-    let isAdminAuthenticated = false;
-    const ADMIN_PASSWORD = "amanah2026";
+    // ... existing logic ...
+    // IMAGE GALLERY SWITCHER
+    function selectProductImage(imgSrc, btnEl, titleText) {
+      document.getElementById('main-product-img').src = imgSrc;
+      document.querySelectorAll('.thumb-btn').forEach(btn => {
+        btn.classList.remove('border-emerald-600', 'active');
+        btn.classList.add('border-transparent');
+      });
+      btnEl.classList.remove('border-transparent');
+      btnEl.classList.add('border-emerald-600', 'active');
 
-    function openAdminPortal() {
-      if (isAdminAuthenticated) {
-        document.getElementById('adminModal').classList.remove('hidden');
-      } else {
-        document.getElementById('adminAuthError').classList.add('hidden');
-        document.getElementById('adminPasswordInput').value = '';
-        document.getElementById('adminAuthModal').classList.remove('hidden');
-        setTimeout(() => {
-          document.getElementById('adminPasswordInput').focus();
-        }, 100);
+      if (titleText) {
+        document.getElementById('product-title-display').textContent = titleText;
       }
     }
-
-    function closeAdminAuthModal() {
-      document.getElementById('adminAuthModal').classList.add('hidden');
-    }
-
-    function verifyAdminPassword(e) {
-      e.preventDefault();
-      const inputPass = document.getElementById('adminPasswordInput').value.trim();
-      
-      if (inputPass === ADMIN_PASSWORD) {
-        isAdminAuthenticated = true;
-        closeAdminAuthModal();
-        document.getElementById('adminModal').classList.remove('hidden');
-      } else {
-        document.getElementById('adminAuthError').classList.remove('hidden');
-      }
-    }
-
-    function lockAdminPortal() {
-      isAdminAuthenticated = false;
-      document.getElementById('adminModal').classList.add('hidden');
-      alert('Admin Portal locked successfully.');
-    }
-
-    function toggleAdminModal() {
-      document.getElementById('adminModal').classList.add('hidden');
-    }
-
-    // PRODUCT CATALOGUE DATABASE
-    const productCatalog = {
-      baskug: {
-        id: "baskug",
-        name: "Amanah Baskug 10-in-1 Coffee For Men",
-        shortDesc: "10-in-1 healthy coffee formulated for men's stamina, vigor and daily vitality with Tongkat Ali, Maca, Ginseng, & Tribulus.",
-        srp: 450,
-        origPrice: 550,
-        unitLabel: "Pack",
-        promoPoster: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494074_w.jpg",
-        mainImg: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494074_w.jpg",
-        gallery: [
-          "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494074_w.jpg"
-        ],
-        bullets: [
-          "<strong>10-in-1 Herbal Blend:</strong> Tongkat Ali, Maca & Ginseng.",
-          "<strong>Male Stamina & Vigor:</strong> Keeps energy levels high naturally.",
-          "<strong>Rich Coffee Taste:</strong> Premium aroma with zero bitter harshness.",
-          "<strong>Special Bundle Offer:</strong> Buy 4 Packs for ₱1,700 + FREE Shipping (Save ₱100)!"
-        ],
-        ingredients: [
-          { icon: "☕", name: "Premium Arabica Coffee", desc: "Rich smooth natural coffee blend" },
-          { icon: "⚡", name: "Tongkat Ali Extract", desc: "Supports male endurance & vitality" },
-          { icon: "🌿", name: "Maca Root", desc: "Boosts physical stamina & energy" },
-          { icon: "🌱", name: "Korean Ginseng", desc: "Enhances mental focus & recovery" }
-        ],
-        bundles: {
-          1: { title: "1 Pack (10 Sachets)", qty: 1, price: 450, shipping: 100 },
-          2: { title: "Duo Saver (2 Packs)", qty: 2, price: 870, shipping: 100 },
-          4: { title: "★ SPECIAL BUNDLE: Buy 4 Packs", qty: 4, price: 1700, shipping: 0, tag: "SAVE ₱100 + FREE SHIPPING" }
-        }
-      },
-      barakah: {
-        id: "barakah",
-        name: "Amanah Barakah Green Coffee Mix",
-        shortDesc: "Nature’s finest green coffee blend loaded with Garcinia Cambogia, L-Carnitine, Mangosteen, Barley & Green Tea.",
-        srp: 450,
-        origPrice: 550,
-        unitLabel: "Pack",
-        promoPoster: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494077_w.jpg",
-        mainImg: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494077_w.jpg",
-        gallery: [
-          "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494077_w.jpg"
-        ],
-        bullets: [
-          "<strong>Boosts Metabolism & Energy:</strong> Natural green coffee bean power.",
-          "<strong>Supports Weight Management:</strong> With Garcinia & L-Carnitine.",
-          "<strong>Antioxidant Protection:</strong> Mangosteen & Grape Seed extracts.",
-          "<strong>Special Bundle Offer:</strong> Buy 4 Packs for ₱1,700 + FREE Shipping (Save ₱100)!"
-        ],
-        ingredients: [
-          { icon: "🌱", name: "Green Coffee Beans", desc: "Rich in Chlorogenic Acid" },
-          { icon: "🍈", name: "Garcinia Cambogia", desc: "Curbs appetite & fat synthesis" },
-          { icon: "⚡", name: "L-Carnitine", desc: "Converts fatty acids into energy" },
-          { icon: "🥭", name: "Mangosteen", desc: "Potent natural xanthones" }
-        ],
-        bundles: {
-          1: { title: "1 Pack (10 Sachets)", qty: 1, price: 450, shipping: 100 },
-          2: { title: "Duo Saver (2 Packs)", qty: 2, price: 870, shipping: 100 },
-          4: { title: "★ SPECIAL BUNDLE: Buy 4 Packs", qty: 4, price: 1700, shipping: 0, tag: "SAVE ₱100 + FREE SHIPPING" }
-        }
-      },
-      glutagen: {
-        id: "glutagen",
-        name: "Amanah Glutagen CEE",
-        shortDesc: "Glutathione + Collagen + Sodium Ascorbate for radiant skin glow, anti-aging & maximum immunity support.",
-        srp: 600,
-        origPrice: 750,
-        unitLabel: "Bottle",
-        promoPoster: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494073_w%20(1)%20-%20Copy.jpg",
-        mainImg: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494073_w%20(1)%20-%20Copy.jpg",
-        gallery: [
-          "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/photo_6235570405695494073_w%20(1)%20-%20Copy.jpg"
-        ],
-        bullets: [
-          "<strong>Skin Whitening & Glow:</strong> High absorption L-Glutathione.",
-          "<strong>Anti-Aging Collagen:</strong> Restores youthful skin elasticity.",
-          "<strong>Non-Acidic Vitamin C:</strong> Sodium Ascorbate for daily immune boost.",
-          "<strong>Special Bundle Offer:</strong> Buy 4 Bottles for ₱2,300 + FREE Shipping (Save ₱100)!"
-        ],
-        ingredients: [
-          { icon: "✨", name: "L-Glutathione", desc: "Master antioxidant for skin radiance" },
-          { icon: "💎", name: "Marine Collagen", desc: "Improves skin firmness & hair health" },
-          { icon: "🍊", name: "Sodium Ascorbate", desc: "Non-acidic immunity builder" }
-        ],
-        bundles: {
-          1: { title: "1 Bottle (30 Softgels)", qty: 1, price: 600, shipping: 100 },
-          2: { title: "Duo Glow (2 Bottles)", qty: 2, price: 1150, shipping: 100 },
-          4: { title: "★ SPECIAL BUNDLE: Buy 4 Bottles", qty: 4, price: 2300, shipping: 0, tag: "SAVE ₱100 + FREE SHIPPING" }
-        }
-      },
-      rub: {
-        id: "rub",
-        name: "Amanah Healing Herbal Vapor Balm",
-        shortDesc: "Aromatic soothing balm for headache, muscle aches, chest tightness, joint relief, and nasal congestion.",
-        srp: 125,
-        origPrice: 180,
-        unitLabel: "Jar",
-        promoPoster: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_g2ehbkg2ehbkg2eh.jpg",
-        mainImg: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_g2ehbkg2ehbkg2eh.jpg",
-        gallery: [
-          "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_g2ehbkg2ehbkg2eh.jpg"
-        ],
-        bullets: [
-          "<strong>Fast Soothing Relief:</strong> Relieves joint pain & muscle aches.",
-          "<strong>Aromatherapy Essential Oil:</strong> Calming menthol & eucalyptus scent.",
-          "<strong>Non-Greasy Formula:</strong> Quick skin absorption.",
-          "<strong>Special Bundle Offer:</strong> Buy 4 Jars for ₱400 + FREE Shipping (Save ₱100)!"
-        ],
-        ingredients: [
-          { icon: "🌿", name: "Eucalyptus Oil", desc: "Clears airway & relaxes muscles" },
-          { icon: "🍃", name: "Menthol & Camphor", desc: "Instant cooling pain relief" },
-          { icon: "🌼", name: "Citrus Oil", desc: "Invigorating aromatherapy aroma" }
-        ],
-        bundles: {
-          1: { title: "1 Jar (50g)", qty: 1, price: 125, shipping: 100 },
-          2: { title: "Duo Pack (2 Jars)", qty: 2, price: 240, shipping: 100 },
-          4: { title: "★ SPECIAL BUNDLE: Buy 4 Jars", qty: 4, price: 400, shipping: 0, tag: "SAVE ₱100 + FREE SHIPPING" }
-        }
-      },
-      herbaloil: {
-        id: "herbaloil",
-        name: "Amanah Liniment Essential Herbal Oil",
-        shortDesc: "Pure essential oil blend for relaxing massage therapy, joint stiffness relief, and body circulation.",
-        srp: 180,
-        origPrice: 250,
-        unitLabel: "Bottle",
-        promoPoster: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_hg6xhchg6xhchg6x.jpg",
-        mainImg: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_hg6xhchg6xhchg6x.jpg",
-        gallery: [
-          "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_hg6xhchg6xhchg6x.jpg"
-        ],
-        bullets: [
-          "<strong>Deep Massage Relief:</strong> Penetrates sore muscles & stiff joints.",
-          "<strong>Improves Circulation:</strong> Warming herbal extract action.",
-          "<strong>100% Pure Plant Oil:</strong> Free from harsh artificial chemicals.",
-          "<strong>Special Bundle Offer:</strong> Buy 4 Bottles for ₱620 + FREE Shipping (Save ₱100)!"
-        ],
-        ingredients: [
-          { icon: "🍊", name: "Natural Citrus Extract", desc: "Energizing scent & relief" },
-          { icon: "🌱", name: "Virgin Coconut Oil", desc: "Smooth skin moisturizing base" }
-        ],
-        bundles: {
-          1: { title: "1 Bottle (60ml)", qty: 1, price: 180, shipping: 100 },
-          2: { title: "Duo Pack (2 Bottles)", qty: 2, price: 340, shipping: 100 },
-          4: { title: "★ SPECIAL BUNDLE: Buy 4 Bottles", qty: 4, price: 620, shipping: 0, tag: "SAVE ₱100 + FREE SHIPPING" }
-        }
-      },
-      serpentina: {
-        id: "serpentina",
-        name: "Amanah Serpentina Supplement",
-        shortDesc: "King of Bitters (Andrographis paniculata) for blood sugar management, liver detox & blood pressure support.",
-        srp: 600,
-        origPrice: 750,
-        unitLabel: "Bottle",
-        promoPoster: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_d7j68fd7j68fd7j6.jpg",
-        mainImg: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_d7j68fd7j68fd7j6.jpg",
-        gallery: [
-          "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/Gemini_Generated_Image_d7j68fd7j68fd7j6.jpg"
-        ],
-        bullets: [
-          "<strong>Blood Sugar Balance:</strong> Helps regulate glucose levels.",
-          "<strong>Liver Cleansing:</strong> Supports natural toxin elimination.",
-          "<strong>Immune Defender:</strong> Powerful antibacterial properties.",
-          "<strong>Special Bundle Offer:</strong> Buy 4 Bottles for ₱2,300 + FREE Shipping (Save ₱100)!"
-        ],
-        ingredients: [
-          { icon: "🍃", name: "Pure Serpentina Leaves", desc: "100% organic Andrographis paniculata" }
-        ],
-        bundles: {
-          1: { title: "1 Bottle (50 Capsules)", qty: 1, price: 600, shipping: 100 },
-          2: { title: "Duo Pack (2 Bottles)", qty: 2, price: 1150, shipping: 100 },
-          4: { title: "★ SPECIAL BUNDLE: Buy 4 Bottles", qty: 4, price: 2300, shipping: 0, tag: "SAVE ₱100 + FREE SHIPPING" }
-        }
-      },
-      spirulina: {
-        id: "spirulina",
-        name: "Amanah Spirulina Superfood",
-        shortDesc: "Nutrient-dense blue-green algae loaded with protein, vitamins, minerals, and chlorophyll.",
-        srp: 350,
-        origPrice: 450,
-        unitLabel: "Bottle",
-        promoPoster: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/3%20(2).png",
-        mainImg: "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/3%20(2).png",
-        gallery: [
-          "https://uvvjcalnadbfqhvquctc.supabase.co/storage/v1/object/public/amanah-media/products/3%20(2).png"
-        ],
-        bullets: [
-          "<strong>Ultimate Superfood:</strong> High plant-based protein content.",
-          "<strong>Cellular Detox:</strong> Rich in chlorophyll & antioxidants.",
-          "<strong>Reduces Fatigue:</strong> Restores natural vitality.",
-          "<strong>Special Bundle Offer:</strong> Buy 4 Bottles for ₱1,300 + FREE Shipping (Save ₱100)!"
-        ],
-        ingredients: [
-          { icon: "🌊", name: "Pure Organic Spirulina", desc: "Rich source of phycocyanin & B-vitamins" }
-        ],
-        bundles: {
-          1: { title: "1 Bottle (100 Tablets)", qty: 1, price: 350, shipping: 100 },
-          2: { title: "Duo Pack (2 Bottles)", qty: 2, price: 670, shipping: 100 },
-          4: { title: "★ SPECIAL BUNDLE: Buy 4 Bottles", qty: 4, price: 1300, shipping: 0, tag: "SAVE ₱100 + FREE SHIPPING" }
-        }
-      }
-    };
-
-    // ACTIVE SELECTION STATE
-    let currentProductId = "barakah";
-    let selectedPackageQty = 4;
-    let currentOrders = [
-      {
-        ref: "AMN-892301",
-        name: "Juan Dela Cruz",
-        phone: "09171234567",
-        address: "#123 Mabini St., Quezon City",
-        packageTitle: "Buy 4 Packs Barakah Coffee",
-        total: 1700,
-        status: "Pending COD",
-        date: "Today"
-      }
-    ];
-
-    let currentReviews = [
-      { name: "Maria Santos", loc: "Davao City", stars: 5, text: "Nag order ako nung Buy 4 Packs promo of Barakah Coffee. Ang bango and very energizing sa umaga! Super sulit discount with free shipping." },
-      { name: "Robert Gonzales", loc: "Cebu City", stars: 5, text: "Baskug Coffee is great for work endurance. No palpitations at smooth ang lasa. Highly recommended wellness coffee!" },
-      { name: "Elena Ramos", loc: "Iloilo City", stars: 5, text: "Ordered Glutagen CEE bundle. Glowing skin and feeling refreshed. COD process was super fast and easy!" }
-    ];
-
-    let currentFaqs = [
-      { q: "Is Cash On Delivery (COD) available nationwide?", a: "Yes! We deliver COD nationwide across Luzon, Visayas, and Mindanao with free shipping on minimum 4-unit orders." },
-      { q: "How many days does delivery take?", a: "Metro Manila & nearby provinces: 2-4 days. Provincial areas: 4-7 days." },
-      { q: "Are these products FDA Approved and Halal certified?", a: "Yes, all Amanah supplements are manufactured under strict FDA and Halal standards." }
-    ];
-
-    // INITIALIZATION & STORE RENDER LOGIC
-    window.onload = function() {
-      renderThumbnails();
-      selectProduct("barakah");
-      renderReviews();
-      renderFaqs();
-      startCountdownTimer();
-      renderAdminOrders();
-      renderAdminPricingList();
-      renderAdminReviews();
-      renderAdminFaqs();
-      renderKbTable();
-      renderAdminMessages();
-    };
-
-    function renderThumbnails() {
-      const carousel = document.getElementById("product-thumbnails-carousel");
-      carousel.innerHTML = "";
-
-      Object.keys(productCatalog).forEach(id => {
-        const prod = productCatalog[id];
-        const isSelected = id === currentProductId;
-        const btn = document.createElement("button");
-        btn.className = `thumb-btn ${isSelected ? 'border-2 border-emerald-600 active' : 'border-2 border-transparent hover:border-emerald-300'} rounded-xl p-1 bg-white shadow-sm flex-shrink-0 w-20 h-20 transition`;
-        btn.onclick = () => selectProduct(id);
-        btn.innerHTML = `<img src="${prod.mainImg}" class="w-full h-full object-contain rounded-lg" alt="${prod.name}" />`;
-        carousel.appendChild(btn);
-      });
-    }
-
-    function selectProduct(prodId) {
-      currentProductId = prodId;
-      const prod = productCatalog[prodId];
-
-      document.getElementById("main-product-img").src = prod.mainImg;
-      document.getElementById("product-title-display").textContent = prod.name;
-      document.getElementById("product-desc-display").textContent = prod.shortDesc;
-      document.getElementById("display-promo-price").textContent = "₱" + prod.srp;
-      document.getElementById("display-orig-price").textContent = "₱" + prod.origPrice;
-
-      // Update Quick Bullets
-      const bulletContainer = document.getElementById("quick-bullets-container");
-      bulletContainer.innerHTML = prod.bullets.map(b => `
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-circle-check text-emerald-600"></i>
-          <span>${b}</span>
-        </div>
-      `).join("");
-
-      // Update Ingredients Grid
-      const ingGrid = document.getElementById("ingredients-grid");
-      ingGrid.innerHTML = prod.ingredients.map(ing => `
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm text-center hover:shadow-md transition">
-          <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-2 text-xl">${ing.icon}</div>
-          <h4 class="font-bold text-xs text-gray-800">${ing.name}</h4>
-          <p class="text-[11px] text-gray-500 mt-0.5">${ing.desc}</p>
-        </div>
-      `).join("");
-
-      // Update Package Selection Cards
-      renderPackageCards(prod);
-      renderThumbnails();
-    }
-
-    function renderPackageCards(prod) {
-      const container = document.getElementById("bundle-cards-container");
-      container.innerHTML = "";
-
-      const keys = Object.keys(prod.bundles);
-      keys.forEach(qtyKey => {
-        const bundle = prod.bundles[qtyKey];
-        const isBestValue = Number(qtyKey) === 4;
-
-        const card = document.createElement("div");
-        card.id = `pkg-card-${qtyKey}`;
-        card.onclick = () => selectPackage(Number(qtyKey));
-        card.className = `pkg-card relative bg-white rounded-2xl p-6 border-2 ${selectedPackageQty === Number(qtyKey) ? 'border-emerald-600 ring-2 ring-emerald-500/20' : 'border-gray-200'} shadow-md cursor-pointer hover:border-emerald-500 transition duration-200 ${isBestValue ? 'transform md:-translate-y-2' : ''}`;
-
-        const totalAmt = bundle.price + bundle.shipping;
-
-        card.innerHTML = `
-          ${isBestValue ? `<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-emerald-950 text-[11px] font-black px-4 py-1 rounded-full shadow uppercase tracking-wider">★ SAVE ₱100 + FREE SHIPPING</div>` : ''}
-          <div class="text-center ${isBestValue ? 'pt-2' : ''}">
-            <span class="text-xs font-bold ${isBestValue ? 'text-emerald-700' : 'text-gray-500'} uppercase tracking-wider block mb-1">${bundle.title}</span>
-            <div class="my-4">
-              <span class="text-3xl font-black text-emerald-700">₱${bundle.price}</span>
-              <span class="text-xs ${bundle.shipping === 0 ? 'text-emerald-600 font-bold' : 'text-gray-400'} block mt-1">${bundle.shipping === 0 ? 'FREE SHIPPING NATIONWIDE' : '+ Shipping Fee ₱' + bundle.shipping}</span>
-            </div>
-            <div class="py-2 px-3 ${isBestValue ? 'bg-emerald-50 text-emerald-800' : 'bg-gray-50 text-gray-600'} rounded-lg text-xs font-bold">
-              Total Amount: <span>₱${totalAmt}</span>
-            </div>
-            <div class="mt-4 pt-4 border-t border-gray-100 text-left space-y-1.5 text-xs text-gray-600">
-              <div class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> ${bundle.qty}x ${prod.name}</div>
-              <div class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Cash On Delivery (COD)</div>
-              ${isBestValue ? `<div class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-600"></i> Guaranteed ₱100 Discount Included</div>` : ''}
-            </div>
-          </div>
-        `;
-
-        container.appendChild(card);
-      });
-
-      selectPackage(selectedPackageQty);
-    }
-
-    function selectPackage(qty) {
-      selectedPackageQty = qty;
-      const prod = productCatalog[currentProductId];
-      const bundle = prod.bundles[qty] || prod.bundles[4];
-
-      document.querySelectorAll(".pkg-card").forEach(c => {
-        c.classList.remove("border-emerald-600", "ring-2", "ring-emerald-500/20");
-        c.classList.add("border-gray-200");
-      });
-
-      const selectedCard = document.getElementById(`pkg-card-${qty}`);
-      if (selectedCard) {
-        selectedCard.classList.remove("border-gray-200");
-        selectedCard.classList.add("border-emerald-600", "ring-2", "ring-emerald-500/20");
-      }
-
-      const totalAmt = bundle.price + bundle.shipping;
-      document.getElementById("summary-selected-pkg").textContent = `${bundle.title} (₱${totalAmt})`;
-      document.getElementById("summary-item-qty").textContent = bundle.qty;
-      document.getElementById("summary-subtotal").textContent = "₱" + bundle.price;
-      document.getElementById("summary-shipping").textContent = bundle.shipping === 0 ? "FREE" : "₱" + bundle.shipping;
-      document.getElementById("summary-grand-total").textContent = "₱" + totalAmt;
-      document.getElementById("sticky-price-mobile").textContent = "₱" + totalAmt;
-    }
-
-    function handleOrderSubmit(e) {
-      e.preventDefault();
-      const prod = productCatalog[currentProductId];
-      const bundle = prod.bundles[selectedPackageQty];
-      const totalAmt = bundle.price + bundle.shipping;
-      const refNo = "AMN-" + Math.floor(100000 + Math.random() * 900000);
-
-      const custName = document.getElementById("fullName").value;
-      const street = document.getElementById("streetAddress").value;
-      const city = document.getElementById("city").value;
-
-      document.getElementById("modal-ref-no").textContent = refNo;
-      document.getElementById("modal-cust-name").textContent = custName;
-      document.getElementById("modal-cust-address").textContent = `${street}, ${city}`;
-      document.getElementById("modal-cust-pkg").textContent = `${bundle.title} (${prod.name})`;
-      document.getElementById("modal-cust-total").textContent = "₱" + totalAmt;
-
-      currentOrders.unshift({
-        ref: refNo,
-        name: custName,
-        phone: document.getElementById("mobileNumber").value,
-        address: `${street}, ${city}`,
-        packageTitle: `${bundle.title} - ${prod.name}`,
-        total: totalAmt,
-        status: "Pending COD",
-        date: "Just Now"
-      });
-
-      renderAdminOrders();
-      document.getElementById("successModal").classList.remove("hidden");
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    }
-
-    function closeSuccessModal() {
-      document.getElementById("successModal").classList.add("hidden");
-    }
-
-    function renderReviews() {
-      const container = document.getElementById("reviews-container");
-      container.innerHTML = currentReviews.map(r => `
-        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex text-amber-400 text-xs">
-              ${'<i class="fa-solid fa-star"></i>'.repeat(r.stars)}
-            </div>
-            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
-          </div>
-          <p class="text-xs text-gray-600 leading-relaxed font-medium">"${r.text}"</p>
-          <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
-            <span class="font-bold text-gray-800">${r.name}</span>
-            <span class="text-gray-400 text-[10px]">${r.loc}</span>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function renderFaqs() {
-      const container = document.getElementById("faq-container");
-      container.innerHTML = currentFaqs.map((f, i) => `
-        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-200">
-          <h4 class="font-bold text-sm text-gray-900 flex items-center gap-2">
-            <i class="fa-solid fa-circle-question text-emerald-600"></i> ${f.q}
-          </h4>
-          <p class="text-xs text-gray-600 mt-2 pl-6 leading-relaxed">${f.a}</p>
-        </div>
-      `).join("");
-    }
-
-    function startCountdownTimer() {
-      let h = 4, m = 28, s = 42;
-      setInterval(() => {
-        s--;
-        if (s < 0) { s = 59; m--; }
-        if (m < 0) { m = 59; h--; }
-        if (h < 0) h = 12;
-
-        document.getElementById("timer-hours").textContent = String(h).padStart(2, '0');
-        document.getElementById("timer-minutes").textContent = String(m).padStart(2, '0');
-        document.getElementById("timer-seconds").textContent = String(s).padStart(2, '0');
-      }, 1000);
-    }
-
-    // ADMIN PORTAL LOGIC & TAB SWITCHING
-    function switchAdminTab(tab) {
-      const tabs = ['orders', 'chats', 'hero', 'packages', 'reviews', 'faqs'];
-      tabs.forEach(t => {
-        document.getElementById(`admin-tab-${t}`).classList.add("hidden");
-        document.getElementById(`tab-btn-${t}`).classList.remove("bg-white", "text-emerald-700", "shadow-sm");
-      });
-
-      document.getElementById(`admin-tab-${tab}`).classList.remove("hidden");
-      document.getElementById(`tab-btn-${tab}`).classList.add("bg-white", "text-emerald-700", "shadow-sm");
-    }
-
-    function renderAdminOrders() {
-      const tbody = document.getElementById("admin-orders-tbody");
-      document.getElementById("admin-orders-count").textContent = currentOrders.length;
-      document.getElementById("stat-total-orders").textContent = currentOrders.length;
-      document.getElementById("stat-pending-orders").textContent = currentOrders.filter(o => o.status.includes("Pending")).length;
-
-      const totalRev = currentOrders.reduce((acc, o) => acc + o.total, 0);
-      document.getElementById("stat-total-revenue").textContent = "₱" + totalRev.toLocaleString();
-
-      tbody.innerHTML = currentOrders.map(o => `
-        <tr class="hover:bg-gray-50 border-b border-gray-100">
-          <td class="p-3 font-mono font-bold text-emerald-800">${o.ref}</td>
-          <td class="p-3 font-bold text-gray-800">${o.name}<br/><span class="text-[10px] text-gray-400">${o.phone}</span></td>
-          <td class="p-3 truncate max-w-[150px]">${o.address}</td>
-          <td class="p-3 font-medium">${o.packageTitle}</td>
-          <td class="p-3 font-black text-emerald-700">₱${o.total}</td>
-          <td class="p-3"><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full text-[10px]">${o.status}</span></td>
-          <td class="p-3">
-            <button onclick="alert('Order ${o.ref} marked as dispatched!')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[10px] font-bold">Dispatch</button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function filterAdminOrders() {
-      const q = document.getElementById("admin-search-input").value.toLowerCase();
-      const filtered = currentOrders.filter(o => o.name.toLowerCase().includes(q) || o.phone.includes(q) || o.ref.toLowerCase().includes(q));
-      
-      const tbody = document.getElementById("admin-orders-tbody");
-      tbody.innerHTML = filtered.map(o => `
-        <tr class="hover:bg-gray-50 border-b border-gray-100">
-          <td class="p-3 font-mono font-bold text-emerald-800">${o.ref}</td>
-          <td class="p-3 font-bold text-gray-800">${o.name}<br/><span class="text-[10px] text-gray-400">${o.phone}</span></td>
-          <td class="p-3 truncate max-w-[150px]">${o.address}</td>
-          <td class="p-3 font-medium">${o.packageTitle}</td>
-          <td class="p-3 font-black text-emerald-700">₱${o.total}</td>
-          <td class="p-3"><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full text-[10px]">${o.status}</span></td>
-          <td class="p-3"><button onclick="alert('Dispatched!')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[10px]">Dispatch</button></td>
-        </tr>
-      `).join("");
-    }
-
-    function exportToCSV() {
-      let csv = "Ref No,Customer Name,Mobile,Address,Package,Total,Status\n";
-      currentOrders.forEach(o => {
-        csv += `"${o.ref}","${o.name}","${o.phone}","${o.address}","${o.packageTitle}",${o.total},"${o.status}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Amanah_Orders_${Date.now()}.csv`;
-      a.click();
-    }
-
-    function saveHeroSettings() {
-      document.getElementById("banner-text-display").textContent = document.getElementById("admin-banner-text").value;
-      document.getElementById("promo-badge-tag").textContent = document.getElementById("admin-badge-text").value;
-      document.getElementById("stock-count-text").textContent = `In Stock (${document.getElementById("admin-hero-stock").value} Left)`;
-      alert("Top Banner & Stock Settings Updated!");
-    }
-
-    function renderAdminPricingList() {
-      const container = document.getElementById("admin-product-pricing-list");
-      container.innerHTML = Object.keys(productCatalog).map(id => {
-        const prod = productCatalog[id];
-        return `
-          <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
-            <div>
-              <span class="font-bold text-xs text-gray-800 block">${prod.name}</span>
-              <span class="text-[10px] text-gray-400">Unit SRP (₱)</span>
-            </div>
-            <div>
-              <input type="number" id="pricing-srp-${id}" value="${prod.srp}" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs font-bold text-emerald-700" />
-            </div>
-            <div>
-              <span class="text-xs font-semibold text-emerald-700">Buy 4 Bundle Promo: ₱${(prod.srp * 4) - 100}</span>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function saveAdminPricing() {
-      Object.keys(productCatalog).forEach(id => {
-        const val = Number(document.getElementById(`pricing-srp-${id}`).value);
-        if (val) {
-          productCatalog[id].srp = val;
-          productCatalog[id].bundles[4].price = (val * 4) - 100;
-        }
-      });
-      selectProduct(currentProductId);
-      alert("Product Catalogue SRP & Promo Bundle Pricing Updated!");
-    }
-
-    function renderAdminReviews() {
-      const list = document.getElementById("admin-reviews-list");
-      list.innerHTML = currentReviews.map((r, i) => `
-        <div class="p-3 bg-white rounded-xl border border-gray-200 flex justify-between items-center text-xs">
-          <div>
-            <span class="font-bold text-gray-800">${r.name} (${r.loc})</span> - <span class="text-amber-500">★ ${r.stars}</span>
-            <p class="text-gray-500 text-[11px]">${r.text}</p>
-          </div>
-          <button onclick="currentReviews.splice(${i},1); renderReviews(); renderAdminReviews();" class="text-red-500 font-bold px-2 py-1"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      `).join("");
-    }
-
-    function addNewReviewAdmin(e) {
-      e.preventDefault();
-      currentReviews.unshift({
-        name: document.getElementById("new-rev-name").value,
-        loc: document.getElementById("new-rev-loc").value,
-        stars: Number(document.getElementById("new-rev-stars").value),
-        text: document.getElementById("new-rev-text").value
-      });
-      renderReviews();
-      renderAdminReviews();
-      e.target.reset();
-    }
-
-    function renderAdminFaqs() {
-      const list = document.getElementById("admin-faqs-list");
-      list.innerHTML = currentFaqs.map((f, i) => `
-        <div class="p-3 bg-white rounded-xl border border-gray-200 flex justify-between items-center text-xs">
-          <div>
-            <span class="font-bold text-gray-800">${f.q}</span>
-            <p class="text-gray-500 text-[11px]">${f.a}</p>
-          </div>
-          <button onclick="currentFaqs.splice(${i},1); renderFaqs(); renderAdminFaqs();" class="text-red-500 font-bold px-2 py-1"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      `).join("");
-    }
-
-    function addNewFaqAdmin(e) {
-      e.preventDefault();
-      currentFaqs.push({
-        q: document.getElementById("new-faq-q").value,
-        a: document.getElementById("new-faq-a").value
-      });
-      renderFaqs();
-      renderAdminFaqs();
-      e.target.reset();
-    }
-
-    // AI CUSTOMER CHAT & AUTO MESSAGING LOGIC
-    let customerSession = { id: 'conv_101', name: 'Juan Dela Cruz', email: 'juan.delacruz@gmail.com' };
-    let activeAdminConvId = 'conv_101';
-    let pendingAttachment = { customer: null, admin: null };
-
-    let DB = {
-      conversations: [
-        { id: 'conv_101', customer_name: 'Juan Dela Cruz', customer_email: 'juan.delacruz@gmail.com', status: 'active', last_message: 'How can I get the Buy 4 Free Shipping bundle?', created_at: '10:14 AM', updated_at: '10:15 AM' }
-      ],
-      messages: [
-        { id: 'msg_1', conversation_id: 'conv_101', sender_type: 'customer', message: 'Hello Amanah Team! Good morning.', created_at: '10:14 AM' },
-        { id: 'msg_2', conversation_id: 'conv_101', sender_type: 'ai', message: 'Welcome to Amanah! How may our team or AI assistant serve you today?', created_at: '10:14 AM' },
-        { id: 'msg_3', conversation_id: 'conv_101', sender_type: 'customer', message: 'How can I get the Buy 4 Free Shipping bundle?', created_at: '10:15 AM' },
-        { id: 'msg_4', conversation_id: 'conv_101', sender_type: 'ai', message: 'You can order 4 packs/bottles directly on our store page to automatically unlock FREE Nationwide Shipping plus Save ₱100 on your order!', created_at: '10:15 AM' }
-      ],
-      kb: [
-        { id: 'kb_1', category: 'Promos', question: 'What is Buy 4 Promo?', answer: 'Buy 4 bottles or packs of any Amanah product to get FREE shipping nationwide and Save ₱100.' },
-        { id: 'kb_2', category: 'Products', question: 'What is Baskug Coffee?', answer: 'Amanah Baskug is a 10-in-1 coffee for men formulated with Tongkat Ali, Maca, Ginseng, & Tribulus.' }
-      ]
-    };
-
-    function toggleCustomerChatWidget() {
-      document.getElementById("customerChatWindow").classList.toggle("hidden");
-      renderCustomerMessages();
-    }
-
-    function closeCustomerChatWidget() {
-      document.getElementById("customerChatWindow").classList.add("hidden");
-    }
-
-    function initCustomerSession() {
-      customerSession.name = document.getElementById("custInputName").value || "Valued Customer";
-      customerSession.email = document.getElementById("custInputEmail").value || "customer@amanah.com";
-      document.getElementById("customerAuthScreen").classList.add("hidden");
-      document.getElementById("customerActiveScreen").classList.remove("hidden");
-      renderCustomerMessages();
-    }
-
-    function renderCustomerMessages() {
-      const stream = document.getElementById("customerMessagesStream");
-      stream.innerHTML = DB.messages.filter(m => m.conversation_id === customerSession.id).map(m => `
-        <div class="flex ${m.sender_type === 'customer' ? 'justify-end' : 'justify-start'}">
-          <div class="max-w-[85%] rounded-xl p-2.5 text-xs space-y-1 ${m.sender_type === 'customer' ? 'chat-bubble-user text-white' : 'chat-bubble-ai text-gray-900'}">
-            <div class="flex justify-between text-[10px] font-bold opacity-75 border-b border-black/5 pb-0.5">
-              <span>${m.sender_type === 'customer' ? 'You' : 'Amanah AI'}</span>
-              <span>${m.created_at}</span>
-            </div>
-            <p>${m.message}</p>
-          </div>
-        </div>
-      `).join("");
-      stream.scrollTop = stream.scrollHeight;
-    }
-
-    function sendCustomerMessage() {
-      const input = document.getElementById("customerMessageInput");
-      const txt = input.value.trim();
-      if (!txt) return;
-
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      DB.messages.push({ id: 'msg_' + Date.now(), conversation_id: customerSession.id, sender_type: 'customer', message: txt, created_at: timeStr });
-      input.value = "";
-      renderCustomerMessages();
-
-      // Trigger AI Response
-      document.getElementById("customerTypingIndicator").classList.remove("hidden");
-      setTimeout(() => {
-        document.getElementById("customerTypingIndicator").classList.add("hidden");
-        let aiReply = "Thank you for your inquiry! Our team will assist you shortly or you may check our Buy 4 Free Shipping offer on the page.";
-        
-        const lower = txt.toLowerCase();
-        if (lower.includes("baskug") || lower.includes("men")) {
-          aiReply = "Amanah Baskug 10-in-1 Coffee for Men is ₱450/pack (10 sachets). Buy 4 Packs for ₱1,700 + FREE Shipping!";
-        } else if (lower.includes("buy 4") || lower.includes("shipping") || lower.includes("promo")) {
-          aiReply = "Our Special Bundle Offer gives you FREE Shipping Nationwide + Save ₱100 on every 4 packs or bottles ordered!";
-        }
-
-        DB.messages.push({ id: 'msg_ai_' + Date.now(), conversation_id: customerSession.id, sender_type: 'ai', message: aiReply, created_at: timeStr });
-        renderCustomerMessages();
-      }, 1000);
-    }
-
-    function sendQuickChip(txt) {
-      document.getElementById("customerMessageInput").value = txt;
-      sendCustomerMessage();
-    }
-
-    function renderAdminMessages() {
-      const stream = document.getElementById("adminMessagesStream");
-      const list = document.getElementById("conversationList");
-      
-      list.innerHTML = DB.conversations.map(c => `
-        <div onclick="activeAdminConvId='${c.id}'; renderAdminMessages();" class="p-3 cursor-pointer hover:bg-emerald-50 ${c.id === activeAdminConvId ? 'bg-emerald-100/60 border-l-4 border-emerald-600' : ''}">
-          <h4 class="text-xs font-bold text-gray-800">${c.customer_name}</h4>
-          <p class="text-[11px] text-gray-500 truncate">${c.last_message}</p>
-        </div>
-      `).join("");
-
-      stream.innerHTML = DB.messages.filter(m => m.conversation_id === activeAdminConvId).map(m => `
-        <div class="flex ${m.sender_type === 'admin' ? 'justify-end' : 'justify-start'}">
-          <div class="max-w-[80%] rounded-xl p-2.5 text-xs ${m.sender_type === 'admin' ? 'bg-emerald-600 text-white' : 'bg-white border text-gray-800'}">
-            <span class="block text-[10px] opacity-75 font-bold">${m.sender_type}</span>
-            <p>${m.message}</p>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function sendAdminReply() {
-      const input = document.getElementById("adminMessageInput");
-      const txt = input.value.trim();
-      if (!txt) return;
-
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      DB.messages.push({ id: 'msg_admin_' + Date.now(), conversation_id: activeAdminConvId, sender_type: 'admin', message: txt, created_at: timeStr });
-      input.value = "";
-      renderAdminMessages();
-      if (customerSession.id === activeAdminConvId) renderCustomerMessages();
-    }
-
-    function renderKbTable() {
-      const tbody = document.getElementById("kbTableBody");
-      tbody.innerHTML = DB.kb.map((k, i) => `
-        <tr class="hover:bg-gray-50 border-b border-gray-200">
-          <td class="p-3 font-bold text-emerald-800">${k.category}</td>
-          <td class="p-3 font-semibold">${k.question}</td>
-          <td class="p-3 text-gray-600">${k.answer}</td>
-          <td class="p-3 text-right"><button onclick="DB.kb.splice(${i},1); renderKbTable();" class="text-red-500 font-bold"><i class="fa-solid fa-trash"></i></button></td>
-        </tr>
-      `).join("");
-    }
-
-    function openKbModal() {
-      const cat = prompt("Category:", "Products");
-      const q = prompt("Question:", "What is Amanah?");
-      const a = prompt("Answer:", "Amanah provides organic wellness products.");
-      if (cat && q && a) {
-        DB.kb.push({ id: 'kb_' + Date.now(), category: cat, question: q, answer: a });
-        renderKbTable();
-      }
-    }
-
-    function handleKeyPress(e, mode) {
-      if (e.key === 'Enter') {
-        if (mode === 'customer') sendCustomerMessage();
-        if (mode === 'admin') sendAdminReply();
-      }
-    }
-
-    function triggerFileInput(id) { document.getElementById(id).click(); }
-    function handleFileSelect(e, mode) { alert("File attached: " + e.target.files[0].name); }
-    function removeAttachment(mode) {}
-    function filterConversations() {}
-    function toggleResolveStatus() { alert("Conversation marked as resolved."); }
+    // ... existing logic ...
   </script>
 </body>
 </html>
