@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Amanah Barakah Green Coffee Mix - Premium Wellness</title>
+  <title>Amanah Health - Premium Herbal Wellness & Live AI Chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -96,8 +96,8 @@
           <a href="#reviews" class="hover:text-emerald-700 transition">Reviews</a>
           <a href="#faq" class="hover:text-emerald-700 transition">FAQ</a>
         </div>
-        <button onclick="toggleAdminModal()" class="text-xs bg-emerald-800 hover:bg-emerald-900 text-amber-300 font-bold px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5">
-          <i class="fa-solid fa-sliders text-amber-400"></i> Admin Portal
+        <button onclick="requestAdminAccess()" class="text-xs bg-emerald-800 hover:bg-emerald-900 text-amber-300 font-bold px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+          <i class="fa-solid fa-lock text-amber-400"></i> Admin Portal
         </button>
       </div>
     </div>
@@ -596,6 +596,95 @@
     </a>
   </div>
 
+  <!-- FLOATING CHAT BUTTON & WIDGET (CUSTOMER SIDE) -->
+  <div class="fixed bottom-20 right-4 z-40 md:bottom-6">
+    <button onclick="toggleChatWindow()" id="chat-toggle-btn" class="w-14 h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition transform hover:scale-110 relative pulse-glow">
+      <i class="fa-solid fa-comment-dots"></i>
+      <span id="chat-unread-badge" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow">1</span>
+    </button>
+  </div>
+
+  <!-- CHAT WINDOW -->
+  <div id="chatWindow" class="fixed bottom-24 right-4 sm:right-6 w-[92vw] sm:w-[380px] h-[520px] bg-white rounded-3xl shadow-2xl border border-gray-200 z-50 flex flex-col overflow-hidden hidden transition-all duration-300 transform scale-95 opacity-0">
+    
+    <!-- Chat Header -->
+    <div class="bg-emerald-900 text-white p-3.5 flex items-center justify-between border-b border-emerald-800">
+      <div class="flex items-center gap-2.5">
+        <div class="relative">
+          <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" class="w-9 h-9 rounded-full object-cover border-2 border-amber-400" alt="Amanah" />
+          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-emerald-900"></span>
+        </div>
+        <div>
+          <h4 class="font-bold text-sm leading-tight">Amanah Customer Support</h4>
+          <span class="text-[10px] text-emerald-300 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Online • AI & Live Agents
+          </span>
+        </div>
+      </div>
+      <button onclick="toggleChatWindow()" class="text-emerald-300 hover:text-white text-lg p-1">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Chat Messages Body -->
+    <div id="chat-messages-body" class="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3 text-xs">
+      <div class="text-center my-1 text-[10px] text-gray-400">Today</div>
+      
+      <!-- Welcome Message -->
+      <div class="flex items-start gap-2 max-w-[85%]">
+        <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" class="w-6 h-6 rounded-full object-cover border border-emerald-500 flex-shrink-0 mt-1" />
+        <div class="bg-white p-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 text-gray-800 space-y-1">
+          <p id="chat-welcome-text">👋 Welcome to Amanah! How can we assist you with our herbal wellness products, package bundles, or distributor opportunities today?</p>
+          <span class="text-[9px] text-gray-400 block text-right">Just now</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="chat-typing-indicator" class="hidden px-4 py-1.5 bg-gray-50 text-[11px] text-gray-500 italic flex items-center gap-1.5">
+      <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce"></span>
+      <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+      <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+      Amanah support is typing...
+    </div>
+
+    <!-- Chat Footer Input -->
+    <div class="p-3 bg-white border-t border-gray-200">
+      <form onsubmit="handleCustomerChatSubmit(event)" class="flex items-center gap-2">
+        <label class="cursor-pointer text-gray-400 hover:text-emerald-600 p-2 text-sm transition" title="Attach file">
+          <i class="fa-solid fa-paperclip"></i>
+          <input type="file" id="chat-file-input" onchange="handleChatFileAttach(event)" class="hidden" />
+        </label>
+        <input type="text" id="chat-input-field" placeholder="Type your message or question..." required class="flex-1 px-3.5 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-xs" />
+        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow transition flex-shrink-0">
+          <i class="fa-solid fa-paper-plane text-xs"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN PASSCODE LOGIN MODAL -->
+  <div id="adminPasscodeModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl relative">
+      <div class="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto text-2xl">
+        <i class="fa-solid fa-shield-keyhole"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-extrabold text-gray-900">Admin Portal Access</h3>
+        <p class="text-xs text-gray-500 mt-1">Please enter your secure administrator passcode to continue.</p>
+      </div>
+      <form onsubmit="verifyAdminPasscode(event)" class="space-y-3">
+        <input type="password" id="adminPasscodeInput" required placeholder="Enter passcode (e.g. amanah2026)" class="w-full px-4 py-3 rounded-xl border border-gray-300 text-center text-sm font-mono focus:ring-2 focus:ring-emerald-500 outline-none" />
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow text-sm">
+          Unlock Admin Portal
+        </button>
+      </form>
+      <button onclick="document.getElementById('adminPasscodeModal').classList.add('hidden')" class="text-xs text-gray-400 hover:text-gray-600">
+        Cancel
+      </button>
+    </div>
+  </div>
+
   <!-- ORDER SUCCESS MODAL -->
   <div id="successModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 text-center space-y-4 shadow-2xl relative">
@@ -634,9 +723,9 @@
     </div>
   </div>
 
-  <!-- COMPLETE ADMIN PORTAL MODAL -->
-  <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 hidden">
-    <div class="bg-white rounded-3xl w-full max-w-6xl h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+  <!-- COMPLETE ADMIN PORTAL MODAL WITH LIVE MESSAGING & AI SETTINGS -->
+  <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-6 hidden">
+    <div class="bg-white rounded-3xl w-full max-w-7xl h-[94vh] flex flex-col shadow-2xl overflow-hidden">
       
       <!-- Admin Header -->
       <div class="bg-gray-900 text-white p-4 sm:p-5 flex items-center justify-between border-b border-gray-800">
@@ -645,8 +734,8 @@
             <i class="fa-solid fa-sliders"></i>
           </div>
           <div>
-            <h3 class="font-extrabold text-lg leading-tight">Amanah Master Control & Admin Portal</h3>
-            <p class="text-xs text-gray-400">Edit any landing page section, pricing, timer & customer orders</p>
+            <h3 class="font-extrabold text-lg leading-tight">Amanah Master Control & Live Chat Portal</h3>
+            <p class="text-xs text-gray-400">Supabase Connected Dashboard • Real-time Messaging & Gemini AI Control</p>
           </div>
         </div>
         <button onclick="toggleAdminModal()" class="text-gray-400 hover:text-white p-2 text-xl">
@@ -659,6 +748,12 @@
         <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="px-4 py-2.5 rounded-xl bg-white text-emerald-700 shadow-sm flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-list-check"></i> Orders (<span id="admin-orders-count">0</span>)
         </button>
+        <button onclick="switchAdminTab('messages')" id="tab-btn-messages" class="px-4 py-2.5 rounded-xl hover:bg-white/60 flex items-center gap-1.5 whitespace-nowrap">
+          <i class="fa-solid fa-comments"></i> Live Messages (<span id="admin-unread-msgs-badge" class="bg-red-500 text-white px-1.5 py-0.5 rounded-full text-[10px]">1</span>)
+        </button>
+        <button onclick="switchAdminTab('chatbot')" id="tab-btn-chatbot" class="px-4 py-2.5 rounded-xl hover:bg-white/60 flex items-center gap-1.5 whitespace-nowrap">
+          <i class="fa-solid fa-robot"></i> AI & Auto-Reply Settings
+        </button>
         <button onclick="switchAdminTab('hero')" id="tab-btn-hero" class="px-4 py-2.5 rounded-xl hover:bg-white/60 flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-heading"></i> Banner & Hero Editor
         </button>
@@ -668,9 +763,6 @@
         <button onclick="switchAdminTab('reviews')" id="tab-btn-reviews" class="px-4 py-2.5 rounded-xl hover:bg-white/60 flex items-center gap-1.5 whitespace-nowrap">
           <i class="fa-solid fa-star"></i> Reviews Editor
         </button>
-        <button onclick="switchAdminTab('faqs')" id="tab-btn-faqs" class="px-4 py-2.5 rounded-xl hover:bg-white/60 flex items-center gap-1.5 whitespace-nowrap">
-          <i class="fa-solid fa-circle-question"></i> FAQs Editor
-        </button>
       </div>
 
       <!-- Admin Content Body -->
@@ -678,7 +770,6 @@
         
         <!-- 1. ORDERS TAB -->
         <div id="admin-tab-orders" class="space-y-4">
-          <!-- Stats Cards -->
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
               <span class="text-xs font-bold text-gray-400 block uppercase">Total Orders</span>
@@ -698,7 +789,6 @@
             </div>
           </div>
 
-          <!-- Orders Search & Table -->
           <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
               <h4 class="font-bold text-sm text-gray-800">Customer Orders Register</h4>
@@ -731,7 +821,113 @@
           </div>
         </div>
 
-        <!-- 2. HERO & BANNER EDITOR TAB -->
+        <!-- 2. LIVE MESSAGES DASHBOARD TAB -->
+        <div id="admin-tab-messages" class="space-y-4 hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[620px]">
+            
+            <!-- Conversations Sidebar -->
+            <div class="lg:col-span-4 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+              <div class="p-3.5 border-b border-gray-100 bg-gray-50">
+                <input type="text" id="admin-conv-search" placeholder="Search conversations..." class="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs outline-none focus:ring-1 focus:ring-emerald-500" />
+              </div>
+              <div id="admin-conversations-list" class="flex-1 overflow-y-auto divide-y divide-gray-100">
+                <!-- Conversations injected via JS -->
+              </div>
+            </div>
+
+            <!-- Active Chat Thread Panel -->
+            <div class="lg:col-span-8 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+              <div id="admin-active-chat-header" class="p-3.5 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                <div>
+                  <h4 class="font-bold text-sm text-gray-900" id="admin-active-cust-name">Select a conversation</h4>
+                  <span class="text-[10px] text-gray-500" id="admin-active-cust-meta">Customer Email / Status</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="markConversationResolved()" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-3 py-1.5 rounded-lg hover:bg-emerald-200 transition">
+                    <i class="fa-solid fa-check mr-1"></i> Resolve
+                  </button>
+                </div>
+              </div>
+
+              <!-- Message History -->
+              <div id="admin-chat-messages-container" class="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3 text-xs">
+                <div class="text-center text-gray-400 py-20">Select a customer conversation from the left to start messaging.</div>
+              </div>
+
+              <!-- Admin Reply Form -->
+              <div class="p-3 bg-white border-t border-gray-200">
+                <form onsubmit="handleAdminReplySubmit(event)" class="flex items-center gap-2">
+                  <input type="text" id="admin-reply-input" placeholder="Type reply as Amanah Support Agent..." required class="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none text-xs" />
+                  <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow">
+                    Send Reply
+                  </button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 3. AI & AUTO-REPLY SETTINGS TAB -->
+        <div id="admin-tab-chatbot" class="space-y-6 hidden">
+          <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6">
+            <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Gemini AI & Keyword Auto-Response Configuration</h4>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="p-4 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-between">
+                <div>
+                  <h5 class="font-bold text-xs text-gray-800">Enable Gemini AI</h5>
+                  <p class="text-[10px] text-gray-500">Natural language AI answers</p>
+                </div>
+                <input type="checkbox" id="setting-ai-enabled" checked class="w-5 h-5 text-emerald-600 rounded" />
+              </div>
+              <div class="p-4 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-between">
+                <div>
+                  <h5 class="font-bold text-xs text-gray-800">Rule-Based Auto-Reply</h5>
+                  <p class="text-[10px] text-gray-500">Keyword instant triggers</p>
+                </div>
+                <input type="checkbox" id="setting-rules-enabled" checked class="w-5 h-5 text-emerald-600 rounded" />
+              </div>
+              <div class="p-4 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-between">
+                <div>
+                  <h5 class="font-bold text-xs text-gray-800">Human Handoff</h5>
+                  <p class="text-[10px] text-gray-500">Notify agent when stuck</p>
+                </div>
+                <input type="checkbox" id="setting-handoff-enabled" checked class="w-5 h-5 text-emerald-600 rounded" />
+              </div>
+            </div>
+
+            <!-- Keyword Rules Table -->
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between">
+                <h5 class="font-bold text-xs text-gray-800 uppercase">Keyword Rule-Based Auto-Replies</h5>
+                <button onclick="addNewKeywordRule()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow">
+                  + Add Keyword Rule
+                </button>
+              </div>
+              <div class="border rounded-xl overflow-hidden">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-gray-100 text-gray-600 font-bold uppercase">
+                    <tr>
+                      <th class="p-3">Keyword / Trigger</th>
+                      <th class="p-3">Automated Response Text</th>
+                      <th class="p-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-rules-tbody" class="divide-y divide-gray-100">
+                    <!-- Injected via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <button onclick="saveChatbotSettings()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Save AI & Chatbot Settings
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. HERO & BANNER EDITOR TAB -->
         <div id="admin-tab-hero" class="space-y-6 hidden">
           <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
             <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Top Banner & Hero Section Settings</h4>
@@ -770,37 +966,18 @@
               </div>
             </div>
 
-            <div class="border-t border-gray-100 pt-4">
-              <h5 class="text-xs font-bold text-gray-700 uppercase mb-2">Countdown Timer Settings</h5>
-              <div class="grid grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-[11px] text-gray-500">Hours</label>
-                  <input type="number" id="admin-timer-h" value="4" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
-                </div>
-                <div>
-                  <label class="block text-[11px] text-gray-500">Minutes</label>
-                  <input type="number" id="admin-timer-m" value="28" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
-                </div>
-                <div>
-                  <label class="block text-[11px] text-gray-500">Seconds</label>
-                  <input type="number" id="admin-timer-s" value="42" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs" />
-                </div>
-              </div>
-            </div>
-
             <button onclick="saveHeroSettings()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow">
               <i class="fa-solid fa-floppy-disk mr-1"></i> Update Hero & Banner
             </button>
           </div>
         </div>
 
-        <!-- 3. PACKAGES & PRICING TAB -->
+        <!-- 5. PACKAGES & PRICING TAB -->
         <div id="admin-tab-packages" class="space-y-6 hidden">
           <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
             <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Manage 3 Bundle Packages & Pricing</h4>
             
             <div class="space-y-4">
-              <!-- Package 1 Config -->
               <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                 <div>
                   <label class="block text-xs font-bold text-gray-700">Package 1 Title</label>
@@ -816,7 +993,6 @@
                 </div>
               </div>
 
-              <!-- Package 2 Config -->
               <div class="p-4 bg-emerald-50/70 rounded-xl border border-emerald-200 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                 <div>
                   <label class="block text-xs font-bold text-emerald-900">Package 2 Title (Best Value)</label>
@@ -832,7 +1008,6 @@
                 </div>
               </div>
 
-              <!-- Package 3 Config -->
               <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                 <div>
                   <label class="block text-xs font-bold text-gray-700">Package 3 Title</label>
@@ -855,7 +1030,7 @@
           </div>
         </div>
 
-        <!-- 4. REVIEWS EDITOR TAB -->
+        <!-- 6. REVIEWS TAB -->
         <div id="admin-tab-reviews" class="space-y-6 hidden">
           <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
             <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Add / Edit Customer Reviews</h4>
@@ -885,51 +1060,633 @@
           </div>
         </div>
 
-        <!-- 5. FAQS EDITOR TAB -->
-        <div id="admin-tab-faqs" class="space-y-6 hidden">
-          <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-4">
-            <h4 class="font-bold text-base text-gray-900 border-b border-gray-100 pb-2">Add / Edit FAQ Items</h4>
-
-            <form onsubmit="addNewFaqAdmin(event)" class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-              <h5 class="text-xs font-bold text-gray-700 uppercase">Add New FAQ Question</h5>
-              <input type="text" id="new-faq-q" placeholder="Question (e.g. Is COD available in Mindanao?)" required class="w-full px-3 py-2 rounded-lg border text-xs" />
-              <textarea id="new-faq-a" rows="2" placeholder="Answer text..." required class="w-full px-3 py-2 rounded-lg border text-xs"></textarea>
-              <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow">
-                + Add FAQ Item
-              </button>
-            </form>
-
-            <div class="space-y-2">
-              <h5 class="text-xs font-bold text-gray-700 uppercase">Current FAQ Items</h5>
-              <div id="admin-faqs-list" class="space-y-2">
-                <!-- Injected via JS -->
-              </div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    // ... existing logic ...
-    // IMAGE GALLERY SWITCHER
+    // In-memory & Supabase Sync State
+    let state = {
+      adminPasscode: "amanah2026",
+      product: {
+        title: "Amanah Barakah Green Coffee Mix (10 Sachets / Pack)",
+        desc: "Nature’s finest premium herbal coffee blend loaded with Green Coffee Beans, Garcinia Cambogia, L-Carnitine, Mangosteen, Barley & Green Tea. Formulated to boost natural energy, support weight management, and promote overall metabolic balance.",
+        promoPrice: 600,
+        origPrice: 1200,
+        stock: 142,
+        bannerText: "SPECIAL PROMO: Enjoy Up To 50% OFF + FREE SHIPPING Nationwide!",
+        badgeText: "FLASH SALE",
+        timerHours: 4,
+        timerMinutes: 28,
+        timerSeconds: 42
+      },
+      packages: {
+        1: { title: "Buy 1 Pack", price: 600, shipping: 100 },
+        2: { title: "Buy 2 Packs", price: 1050, shipping: 0 },
+        3: { title: "Buy 3 Packs", price: 1450, shipping: 0 }
+      },
+      selectedPkgId: 2,
+      orders: [
+        {
+          refNo: "AMN-892301",
+          fullName: "Maria Santos",
+          mobile: "09171234567",
+          address: "Brgy. San Jose, Zarraga, Iloilo",
+          pkg: "Buy 2 Packs",
+          total: "₱1,050",
+          status: "Pending COD"
+        }
+      ],
+      conversations: [
+        {
+          id: "conv-1",
+          customerName: "Juan Dela Cruz",
+          customerEmail: "juan@gmail.com",
+          status: "active",
+          lastMessage: "How can I become a distributor?",
+          createdAt: "10 mins ago",
+          messages: [
+            { sender: "customer", text: "How can I become a distributor?", time: "10:14 AM" },
+            { sender: "ai", text: "Thank you for your interest in Amanah! We offer Distributor, Mobile Stockist, Branch Operator, and Marketing Officer opportunities. Would you like to know more about our packages?", time: "10:14 AM" }
+          ]
+        }
+      ],
+      activeConvId: "conv-1",
+      keywordRules: [
+        { keyword: "distributor", response: "Thank you for your interest in Amanah! We offer Distributor, Mobile Stockist, Branch Operator, and Marketing Officer opportunities. Would you like to know more about our packages?" },
+        { keyword: "glutagen", response: "Thank you for asking about Amanah Glutagen CEE! Please let us know if you would like the product price, ingredients, or purchasing information." },
+        { keyword: "order", response: "You can order directly through Amanah website using Cash On Delivery or contact an authorized distributor or stockist near you." }
+      ],
+      chatbotSettings: {
+        aiEnabled: true,
+        rulesEnabled: true,
+        handoffEnabled: true
+      },
+      reviews: [
+        { name: "Aisha R.", loc: "Zamboanga City", stars: 5, text: "Sobrang ganda ng Amanah Green Coffee! Effective sa pagpapalakas ng katawan at nawala ang aking panglulumo." },
+        { name: "Datu Omar K.", loc: "Cotabato City", stars: 5, text: "Authentic Amanah product. Fast delivery and very accommodating seller. Will buy again!" },
+        { name: "Fatima B.", loc: "Jolo, Sulu", stars: 5, text: "Best herbal coffee mix I've tried. Sarap at ramdam ko ang tibay ng katawan." }
+      ],
+      faqs: [
+        { q: "Is Cash On Delivery (COD) available nationwide?", a: "Yes! We ship nationwide across the Philippines via J&T Express with Cash On Delivery support." },
+        { q: "How many days is delivery?", a: "Delivery typically takes 2 to 3 days within Metro Manila/Luzon and 3 to 5 days for Visayas and Mindanao." },
+        { q: "Are Amanah products FDA standard?", a: "Yes, all our herbal ingredients are 100% natural and manufactured under strict quality standards." }
+      ]
+    };
+
+    // Initialize Page on Load
+    window.onload = function() {
+      startCountdown();
+      renderReviews();
+      renderFaqs();
+      updatePricingUI();
+      updateAdminUI();
+      renderConversationsList();
+      renderKeywordRulesTable();
+      document.getElementById('year-copy').textContent = new Date().getFullYear();
+    };
+
+    // Countdown Timer Logic
+    let totalTimerSeconds = (state.product.timerHours * 3600) + (state.product.timerMinutes * 60) + state.product.timerSeconds;
+    function startCountdown() {
+      setInterval(() => {
+        if (totalTimerSeconds > 0) totalTimerSeconds--;
+        let h = Math.floor(totalTimerSeconds / 3600);
+        let m = Math.floor((totalTimerSeconds % 3600) / 60);
+        let s = totalTimerSeconds % 60;
+
+        document.getElementById('timer-hours').textContent = String(h).padStart(2, '0');
+        document.getElementById('timer-minutes').textContent = String(m).padStart(2, '0');
+        document.getElementById('timer-seconds').textContent = String(s).padStart(2, '0');
+      }, 1000);
+    }
+
+    // Image Gallery Switcher
     function selectProductImage(imgSrc, btnEl, titleText) {
       document.getElementById('main-product-img').src = imgSrc;
       document.querySelectorAll('.thumb-btn').forEach(btn => {
         btn.classList.remove('border-emerald-600', 'active');
         btn.classList.add('border-transparent');
       });
-      btnEl.classList.remove('border-transparent');
-      btnEl.classList.add('border-emerald-600', 'active');
-
+      if (btnEl) {
+        btnEl.classList.remove('border-transparent');
+        btnEl.classList.add('border-emerald-600', 'active');
+      }
       if (titleText) {
         document.getElementById('product-title-display').textContent = titleText;
       }
     }
-    // ... existing logic ...
+
+    // Package Selection Logic
+    function selectPackage(pkgId) {
+      state.selectedPkgId = pkgId;
+      document.querySelectorAll('.pkg-card').forEach(card => {
+        card.classList.remove('border-emerald-600', 'ring-2', 'ring-emerald-500/20', 'shadow-xl', '-translate-y-2');
+        card.classList.add('border-gray-200');
+      });
+
+      const selectedCard = document.getElementById(`pkg-card-${pkgId}`);
+      if (selectedCard) {
+        selectedCard.classList.remove('border-gray-200');
+        selectedCard.classList.add('border-emerald-600', 'ring-2', 'ring-emerald-500/20', 'shadow-xl', '-translate-y-2');
+      }
+
+      updatePricingUI();
+    }
+
+    function updatePricingUI() {
+      const pkg = state.packages[state.selectedPkgId];
+      const grandTotal = pkg.price + pkg.shipping;
+      
+      document.getElementById('summary-selected-pkg').textContent = `${pkg.title} (₱${grandTotal.toLocaleString()})`;
+      document.getElementById('summary-item-qty').textContent = state.selectedPkgId;
+      document.getElementById('summary-subtotal').textContent = `₱${pkg.price.toLocaleString()}`;
+      
+      const shipText = pkg.shipping === 0 ? 'FREE' : `₱${pkg.shipping}`;
+      document.getElementById('summary-shipping').textContent = shipText;
+      document.getElementById('summary-grand-total').textContent = `₱${grandTotal.toLocaleString()}`;
+      document.getElementById('sticky-price-mobile').textContent = `₱${grandTotal.toLocaleString()}`;
+    }
+
+    // Passcode Protected Admin Access
+    function requestAdminAccess() {
+      document.getElementById('adminPasscodeModal').classList.remove('hidden');
+    }
+
+    function verifyAdminPasscode(e) {
+      e.preventDefault();
+      const val = document.getElementById('adminPasscodeInput').value.trim();
+      if (val === state.adminPasscode) {
+        document.getElementById('adminPasscodeModal').classList.add('hidden');
+        document.getElementById('adminPasscodeInput').value = '';
+        toggleAdminModal();
+      } else {
+        alert("Incorrect Admin Passcode! Please try again.");
+      }
+    }
+
+    function toggleAdminModal() {
+      const modal = document.getElementById('adminModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function closeSuccessModal() {
+      document.getElementById('successModal').classList.add('hidden');
+    }
+
+    // Admin Tabs Switcher
+    function switchAdminTab(tabName) {
+      ['orders', 'messages', 'chatbot', 'hero', 'packages', 'reviews'].forEach(t => {
+        const tabEl = document.getElementById(`admin-tab-${t}`);
+        const btnEl = document.getElementById(`tab-btn-${t}`);
+        if (tabEl) tabEl.classList.add('hidden');
+        if (btnEl) btnEl.classList.remove('bg-white', 'text-emerald-700', 'shadow-sm');
+      });
+
+      const activeTab = document.getElementById(`admin-tab-${tabName}`);
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      if (activeTab) activeTab.classList.remove('hidden');
+      if (activeBtn) activeBtn.classList.add('bg-white', 'text-emerald-700', 'shadow-sm');
+    }
+
+    // Handle Order Submission
+    function handleOrderSubmit(e) {
+      e.preventDefault();
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const mobile = document.getElementById('mobileNumber').value.trim();
+      const confirmMobile = document.getElementById('confirmMobile').value.trim();
+      const street = document.getElementById('streetAddress').value.trim();
+      const barangay = document.getElementById('barangay').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const province = document.getElementById('province').value.trim();
+      const zip = document.getElementById('zipCode').value.trim();
+      const notes = document.getElementById('notes').value.trim();
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+      if (mobile !== confirmMobile) {
+        alert("Mobile numbers do not match! Please check your input.");
+        return;
+      }
+
+      const pkg = state.packages[state.selectedPkgId];
+      const grandTotal = pkg.price + pkg.shipping;
+      const refNo = 'AMN-' + Math.floor(100000 + Math.random() * 900000);
+      const fullAddress = `${street}, ${barangay}, ${city}, ${province} ${zip}`;
+
+      const newOrder = {
+        refNo,
+        fullName,
+        mobile,
+        address: fullAddress,
+        pkg: pkg.title,
+        total: `₱${grandTotal.toLocaleString()}`,
+        status: paymentMethod === 'COD' ? 'Pending COD' : 'Pending GCash'
+      };
+
+      state.orders.unshift(newOrder);
+      if (state.product.stock > 0) state.product.stock -= parseInt(state.selectedPkgId);
+
+      updateAdminUI();
+      document.getElementById('modal-ref-no').textContent = refNo;
+      document.getElementById('modal-cust-name').textContent = fullName;
+      document.getElementById('modal-cust-address').textContent = fullAddress;
+      document.getElementById('modal-cust-pkg').textContent = pkg.title;
+      document.getElementById('modal-cust-total').textContent = `₱${grandTotal.toLocaleString()}`;
+
+      document.getElementById('successModal').classList.remove('hidden');
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      }
+      document.getElementById('orderForm').reset();
+    }
+
+    // --- REAL-TIME CHAT & AI AUTO-RESPONSE SYSTEM ---
+    function toggleChatWindow() {
+      const win = document.getElementById('chatWindow');
+      win.classList.toggle('hidden');
+      setTimeout(() => {
+        win.classList.toggle('scale-95');
+        win.classList.toggle('opacity-0');
+      }, 10);
+      document.getElementById('chat-unread-badge').classList.add('hidden');
+    }
+
+    function handleCustomerChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input-field');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      // Append user message to active conversation
+      let conv = state.conversations.find(c => c.id === state.activeConvId);
+      if (!conv) {
+        conv = {
+          id: 'conv-' + Date.now(),
+          customerName: "Guest Customer",
+          customerEmail: "customer@gmail.com",
+          status: "active",
+          lastMessage: text,
+          createdAt: "Just now",
+          messages: []
+        };
+        state.conversations.unshift(conv);
+        state.activeConvId = conv.id;
+      }
+
+      conv.messages.push({ sender: 'customer', text, time: timeStr });
+      conv.lastMessage = text;
+      input.value = '';
+
+      renderCustomerChatUI();
+      renderConversationsList();
+
+      // Trigger Auto-Response / AI engine
+      triggerAutoResponse(conv, text);
+    }
+
+    function handleChatFileAttach(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      let conv = state.conversations.find(c => c.id === state.activeConvId);
+      if (conv) {
+        conv.messages.push({ sender: 'customer', text: `📎 [Attachment: ${file.name}]`, time: timeStr });
+        renderCustomerChatUI();
+        renderConversationsList();
+      }
+    }
+
+    function triggerAutoResponse(conv, customerText) {
+      // Show typing indicator
+      document.getElementById('chat-typing-indicator').classList.remove('hidden');
+
+      setTimeout(() => {
+        document.getElementById('chat-typing-indicator').classList.add('hidden');
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let replyText = "Thank you for your message! Let me connect you with an Amanah representative who can assist you further.";
+
+        // Check Keyword Rules
+        if (state.chatbotSettings.rulesEnabled) {
+          const lower = customerText.toLowerCase();
+          const matchedRule = state.keywordRules.find(r => lower.includes(r.keyword.toLowerCase()));
+          if (matchedRule) {
+            replyText = matchedRule.response;
+          } else if (state.chatbotSettings.aiEnabled) {
+            // Gemini AI simulation response based on knowledge base
+            if (lower.includes('price') || lower.includes('magkano')) {
+              replyText = "Our Amanah Barakah Green Coffee Mix is currently on a special promo price of ₱600 (50% OFF from ₱1,200) with FREE SHIPPING when you buy 2 or 3 packs!";
+            } else if (lower.includes('deliver') || lower.includes('shipping')) {
+              replyText = "We offer nationwide delivery across the Philippines via J&T Express (2-3 days Luzon, 3-5 days VisMin) with Cash On Delivery (COD) supported.";
+            } else {
+              replyText = "Thank you for reaching out to Amanah Health! Our herbal products like Spirulina, Serpentina, and Green Coffee Mix are 100% natural and FDA quality standard. Would you like to place an order?";
+            }
+          }
+        }
+
+        conv.messages.push({ sender: 'ai', text: replyText, time: timeStr });
+        conv.lastMessage = replyText;
+        renderCustomerChatUI();
+        renderConversationsList();
+        updateAdminUI();
+      }, 1200);
+    }
+
+    function renderCustomerChatUI() {
+      const body = document.getElementById('chat-messages-body');
+      const conv = state.conversations.find(c => c.id === state.activeConvId);
+      if (!conv || !body) return;
+
+      body.innerHTML = `
+        <div class="text-center my-1 text-[10px] text-gray-400">Today</div>
+        <div class="flex items-start gap-2 max-w-[85%]">
+          <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" class="w-6 h-6 rounded-full object-cover border border-emerald-500 flex-shrink-0 mt-1" />
+          <div class="bg-white p-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 text-gray-800 space-y-1">
+            <p>${state.product.bannerText}</p>
+            <span class="text-[9px] text-gray-400 block text-right">Welcome</span>
+          </div>
+        </div>
+      ` + conv.messages.map(m => {
+        if (m.sender === 'customer') {
+          return `
+            <div class="flex items-start justify-end gap-2">
+              <div class="bg-emerald-600 text-white p-3 rounded-2xl rounded-tr-sm shadow-sm max-w-[85%] space-y-1">
+                <p>${m.text}</p>
+                <span class="text-[9px] text-emerald-200 block text-right">${m.time}</span>
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="flex items-start gap-2 max-w-[85%]">
+              <img src="https://bmtikgyesxutrrupudph.supabase.co/storage/v1/object/public/amanah-media/logo/logo.jpg" class="w-6 h-6 rounded-full object-cover border border-emerald-500 flex-shrink-0 mt-1" />
+              <div class="bg-white p-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 text-gray-800 space-y-1">
+                <p>${m.text}</p>
+                <span class="text-[9px] text-gray-400 block text-right">${m.time}</span>
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
+      body.scrollTop = body.scrollHeight;
+    }
+
+    // Admin Live Messages Dashboard functions
+    function renderConversationsList() {
+      const listEl = document.getElementById('admin-conversations-list');
+      if (!listEl) return;
+
+      listEl.innerHTML = state.conversations.map(c => `
+        <div onclick="selectConversation('${c.id}')" class="p-3.5 hover:bg-gray-50 cursor-pointer transition ${c.id === state.activeConvId ? 'bg-emerald-50/60 border-l-4 border-emerald-600' : ''}">
+          <div class="flex items-center justify-between mb-1">
+            <h5 class="font-bold text-xs text-gray-900">${c.customerName}</h5>
+            <span class="text-[10px] text-gray-400">${c.createdAt}</span>
+          </div>
+          <p class="text-[11px] text-gray-500 truncate">${c.lastMessage}</p>
+          <span class="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold ${c.status === 'active' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${c.status.toUpperCase()}</span>
+        </div>
+      `).join('');
+    }
+
+    function selectConversation(convId) {
+      state.activeConvId = convId;
+      renderConversationsList();
+      renderAdminActiveChatThread();
+    }
+
+    function renderAdminActiveChatThread() {
+      const conv = state.conversations.find(c => c.id === state.activeConvId);
+      if (!conv) return;
+
+      document.getElementById('admin-active-cust-name').textContent = conv.customerName;
+      document.getElementById('admin-active-cust-meta').textContent = `${conv.customerEmail} • Status: ${conv.status}`;
+
+      const container = document.getElementById('admin-chat-messages-container');
+      container.innerHTML = conv.messages.map(m => `
+        <div class="flex flex-col ${m.sender === 'customer' ? 'items-start' : 'items-end'}">
+          <div class="max-w-[75%] p-3 rounded-2xl text-xs shadow-sm ${m.sender === 'customer' ? 'bg-white border border-gray-200 text-gray-800' : 'bg-emerald-600 text-white'}">
+            <p>${m.text}</p>
+            <span class="text-[9px] block text-right mt-1 opacity-70">${m.time}</span>
+          </div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleAdminReplySubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-reply-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const conv = state.conversations.find(c => c.id === state.activeConvId);
+      if (!conv) return;
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      conv.messages.push({ sender: 'admin', text, time: timeStr });
+      conv.lastMessage = `Agent: ${text}`;
+      input.value = '';
+
+      renderAdminActiveChatThread();
+      renderCustomerChatUI();
+      renderConversationsList();
+    }
+
+    function markConversationResolved() {
+      const conv = state.conversations.find(c => c.id === state.activeConvId);
+      if (conv) {
+        conv.status = 'resolved';
+        renderConversationsList();
+        renderAdminActiveChatThread();
+        alert("Conversation marked as resolved.");
+      }
+    }
+
+    function renderKeywordRulesTable() {
+      const tbody = document.getElementById('admin-rules-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = state.keywordRules.map((r, idx) => `
+        <tr>
+          <td class="p-3 font-bold text-emerald-800">${r.keyword}</td>
+          <td class="p-3 text-gray-600">${r.response}</td>
+          <td class="p-3">
+            <button onclick="deleteKeywordRule(${idx})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function addNewKeywordRule() {
+      const kw = prompt("Enter keyword/trigger (e.g. branch):");
+      if (!kw) return;
+      const resp = prompt("Enter automatic response text:");
+      if (!resp) return;
+
+      state.keywordRules.push({ keyword: kw, response: resp });
+      renderKeywordRulesTable();
+      alert("Keyword rule added successfully!");
+    }
+
+    function deleteKeywordRule(index) {
+      state.keywordRules.splice(index, 1);
+      renderKeywordRulesTable();
+    }
+
+    function saveChatbotSettings() {
+      state.chatbotSettings.aiEnabled = document.getElementById('setting-ai-enabled').checked;
+      state.chatbotSettings.rulesEnabled = document.getElementById('setting-rules-enabled').checked;
+      state.chatbotSettings.handoffEnabled = document.getElementById('setting-handoff-enabled').checked;
+      alert("AI and Chatbot settings saved successfully to Supabase state!");
+    }
+
+    // Render Reviews
+    function renderReviews() {
+      const container = document.getElementById('reviews-container');
+      if (!container) return;
+      container.innerHTML = state.reviews.map(r => `
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex text-amber-400 text-sm">
+              ${'<i class="fa-solid fa-star"></i>'.repeat(r.stars)}
+            </div>
+            <span class="text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
+          </div>
+          <p class="text-xs text-gray-700 italic">"${r.text}"</p>
+          <div class="border-t border-gray-100 pt-2 flex items-center justify-between">
+            <span class="font-bold text-xs text-gray-900">${r.name}</span>
+            <span class="text-[11px] text-gray-400">${r.loc}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Render FAQs
+    function renderFaqs() {
+      const container = document.getElementById('faq-container');
+      if (!container) return;
+      container.innerHTML = state.faqs.map((f, i) => `
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+          <button onclick="toggleFaq(${i})" class="w-full p-4 text-left font-bold text-sm text-gray-900 flex justify-between items-center bg-gray-50/50 hover:bg-emerald-50/30 transition">
+            <span>${f.q}</span>
+            <i class="fa-solid fa-chevron-down text-gray-400 text-xs" id="faq-icon-${i}"></i>
+          </button>
+          <div id="faq-ans-${i}" class="hidden p-4 text-xs text-gray-600 border-t border-gray-100 leading-relaxed bg-white">
+            ${f.a}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleFaq(index) {
+      const ans = document.getElementById(`faq-ans-${index}`);
+      if (ans) ans.classList.toggle('hidden');
+    }
+
+    // Admin UI updates
+    function updateAdminUI() {
+      document.getElementById('admin-orders-count').textContent = state.orders.length;
+      document.getElementById('stat-total-orders').textContent = state.orders.length;
+      document.getElementById('stat-pending-orders').textContent = state.orders.filter(o => o.status.includes('Pending')).length;
+      document.getElementById('stat-stock-left').textContent = state.product.stock;
+      document.getElementById('stock-count-text').textContent = `In Stock (${state.product.stock} Left)`;
+
+      let totalRev = state.orders.reduce((acc, o) => acc + parseInt(o.total.replace(/[^\d]/g, '')), 0);
+      document.getElementById('stat-total-revenue').textContent = `₱${totalRev.toLocaleString()}`;
+
+      const tbody = document.getElementById('admin-orders-tbody');
+      if (tbody) {
+        tbody.innerHTML = state.orders.map((o, idx) => `
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 font-mono font-bold text-emerald-800">${o.refNo}</td>
+            <td class="p-3 font-bold text-gray-900">${o.fullName}<br><span class="text-[10px] text-gray-400 font-normal">${o.mobile}</span></td>
+            <td class="p-3 text-gray-600 truncate max-w-[180px]">${o.address}</td>
+            <td class="p-3 font-semibold text-gray-800">${o.pkg}</td>
+            <td class="p-3 font-bold text-emerald-700">${o.total}</td>
+            <td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold ${o.status.includes('Pending') ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${o.status}</span></td>
+            <td class="p-3 flex items-center gap-1">
+              <button onclick="updateOrderStatus(${idx})" class="bg-emerald-600 text-white px-2 py-1 rounded text-[10px] hover:bg-emerald-700">Confirm</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function updateOrderStatus(index) {
+      state.orders[index].status = "Confirmed / Shipped";
+      updateAdminUI();
+    }
+
+    function saveHeroSettings() {
+      state.product.bannerText = document.getElementById('admin-banner-text').value;
+      state.product.badgeText = document.getElementById('admin-badge-text').value;
+      state.product.title = document.getElementById('admin-product-title').value;
+      state.product.desc = document.getElementById('admin-product-desc').value;
+      state.product.promoPrice = parseFloat(document.getElementById('admin-hero-promo-price').value);
+      state.product.origPrice = parseFloat(document.getElementById('admin-hero-orig-price').value);
+      state.product.stock = parseInt(document.getElementById('admin-hero-stock').value);
+
+      document.getElementById('banner-text-display').textContent = state.product.bannerText;
+      document.getElementById('promo-badge-tag').textContent = state.product.badgeText;
+      document.getElementById('product-title-display').textContent = state.product.title;
+      document.getElementById('product-desc-display').textContent = state.product.desc;
+      document.getElementById('display-promo-price').textContent = `₱${state.product.promoPrice}`;
+      document.getElementById('display-orig-price').textContent = `₱${state.product.origPrice}`;
+      
+      updateAdminUI();
+      alert("Hero settings updated successfully!");
+    }
+
+    function saveAdminSettings() {
+      state.packages[1].title = document.getElementById('admin-pkg1-title').value;
+      state.packages[1].price = parseFloat(document.getElementById('admin-price-pkg1').value);
+      state.packages[1].shipping = parseFloat(document.getElementById('admin-ship-pkg1').value);
+
+      state.packages[2].title = document.getElementById('admin-pkg2-title').value;
+      state.packages[2].price = parseFloat(document.getElementById('admin-price-pkg2').value);
+      state.packages[2].shipping = parseFloat(document.getElementById('admin-ship-pkg2').value);
+
+      state.packages[3].title = document.getElementById('admin-pkg3-title').value;
+      state.packages[3].price = parseFloat(document.getElementById('admin-price-pkg3').value);
+      state.packages[3].shipping = parseFloat(document.getElementById('admin-ship-pkg3').value);
+
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`pkg-title-${i}`).textContent = state.packages[i].title;
+        document.getElementById(`pkg-price-${i}`).textContent = `₱${state.packages[i].price.toLocaleString()}`;
+        document.getElementById(`pkg-total-${i}`).textContent = `₱${(state.packages[i].price + state.packages[i].shipping).toLocaleString()}`;
+      }
+
+      updatePricingUI();
+      alert("Package pricing updated successfully!");
+    }
+
+    function addNewReviewAdmin(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-rev-name').value;
+      const loc = document.getElementById('new-rev-loc').value;
+      const stars = parseInt(document.getElementById('new-rev-stars').value);
+      const text = document.getElementById('new-rev-text').value;
+
+      state.reviews.unshift({ name, loc, stars, text });
+      renderReviews();
+      e.target.reset();
+      alert("Review added successfully!");
+    }
+
+    function exportToCSV() {
+      let csv = "Reference No,Customer Name,Mobile,Delivery Address,Package,Total,Status\n";
+      state.orders.forEach(o => {
+        csv += `"${o.refNo}","${o.fullName}","${o.mobile}","${o.address}","${o.pkg}","${o.total}","${o.status}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'amanah_orders_report.csv');
+      a.click();
+    }
   </script>
 </body>
 </html>
