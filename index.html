@@ -909,18 +909,22 @@
             return;
         }
 
-        // Initialize Supabase Client with disabled realtime websockets to avoid Canvas SecurityError
+        // Initialize Supabase Client with Realtime disabled to avoid WebSocket SecurityError in Canvas iframe
         window.supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
             SUPABASE_PUBLISHABLE_KEY,
             {
+              auth: {
+                persistSession: false
+              },
               realtime: {
-                autoConnect: false // Prevents automatic WebSocket connection attempts in sandboxed Canvas iframe
+                enabled: false,
+                autoConnect: false
               }
             }
         );
 
-        console.log("Supabase connected successfully!");
+        console.log("Supabase connected successfully (Canvas Fallback Mode Active)!");
     })();
 
     let isAdminAuthenticated = false;
@@ -1265,12 +1269,13 @@
         } catch (e) {}
       }
 
-      // Safely attempt channel connection; gracefully fall back if Canvas restricts WebSocket creation
-      if (window.supabaseClient && typeof window.supabaseClient.channel === 'function') {
+      // Check if running inside Canvas environment where WebSockets are restricted
+      const isCanvasEnv = window.location.href.includes('canvas') || window.parent !== window;
+
+      if (!isCanvasEnv && window.supabaseClient && typeof window.supabaseClient.channel === 'function') {
         try {
-          // Check if WebSocket is available/allowed in current environment
           if (typeof WebSocket === 'undefined') {
-            console.warn('WebSockets unavailable. Falling back to instant local messaging.');
+            console.warn('WebSockets unavailable. Operating in instant local messaging mode.');
             return;
           }
 
@@ -1301,17 +1306,12 @@
               }
             );
 
-          // Attempt subscription with try-catch block for canvas security guardrails
-          realtimeChannel.subscribe((status, err) => {
-            if (err || status === 'CHANNEL_ERROR') {
-              console.warn('Realtime channel fallback active (Canvas WebSocket restricted). Instant messaging operating locally.');
-            } else {
-              console.log('Realtime subscription status:', status);
-            }
-          });
+          realtimeChannel.subscribe();
         } catch (err) {
-          console.warn('Realtime channel fallback mode active:', err.message);
+          console.warn('Realtime subscription bypassed for sandbox safety.');
         }
+      } else {
+        console.log('Canvas sandbox detected: Utilizing instant local state messaging.');
       }
     }
 
