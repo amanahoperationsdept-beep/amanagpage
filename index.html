@@ -894,11 +894,7 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    // SUPABASE & AGENT SKILLS CONFIGURATION
-    const SUPABASE_URL = "https://uvvjcalnadbfqhvquctc.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = typeof __supabase_key !== 'undefined' ? __supabase_key : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; 
-    let supabaseClient = null;
-
+    /
     try {
       if (window.WebSocket && !window.location.hostname.includes('sandbox')) {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -1392,5 +1388,13 @@
       }
     }
   </script>
+  <!-- Supabase library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Supabase connection -->
+<script src="./supabase.js"></script>
+
+<!-- Main website JavaScript -->
+<script src="./script.js"></script>
 </body>
 </html>
