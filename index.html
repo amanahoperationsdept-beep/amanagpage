@@ -133,8 +133,9 @@
 
       <form onsubmit="verifyAdminPassword(event)" class="space-y-3">
         <div class="relative">
-          <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" required class="w-full px-4 py-3 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-center font-bold tracking-widest" />
-          <span class="text-[10px] text-gray-400 block mt-1">Default Demo Password: <code class="bg-gray-100 px-1 py-0.5 rounded text-emerald-700 font-mono">amanah2026</code></span>
+          <input type="email" id="adminEmailInput" value="amanahoperationsdept@gmail.com" placeholder="Administrator email" required class="w-full px-4 py-3 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-center" />
+          <input type="password" id="adminPasswordInput" placeholder="Supabase administrator password" required class="w-full px-4 py-3 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-center" />
+          <span class="text-[10px] text-gray-400 block mt-1">Sign in using your Supabase administrator account.</span>
         </div>
         <p id="adminAuthError" class="text-xs font-bold text-red-600 hidden">Incorrect password. Please try again.</p>
         
@@ -878,7 +879,7 @@
             SUPABASE_URL,
             SUPABASE_PUBLISHABLE_KEY,
             {
-              auth: { persistSession: false },
+              auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
               realtime: {
                 params: { eventsPerSecond: 10 }
               }
@@ -889,7 +890,27 @@
     })();
 
     let isAdminAuthenticated = false;
-    const ADMIN_PASSWORD = "amanah2026";
+    let currentVisitorId = null;
+    let ordersChannel = null;
+    let conversationsChannel = null;
+    const supabaseReady = (async () => {
+      if (!window.supabaseClient) throw new Error("Supabase client unavailable");
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session?.user) { currentVisitorId = session.user.id; return session.user; }
+      const { data, error } = await window.supabaseClient.auth.signInAnonymously();
+      if (error) throw error;
+      currentVisitorId = data.user.id;
+      return data.user;
+    })();
+
+    async function requireVisitor() {
+      const { data: { user: existing } } = await window.supabaseClient.auth.getUser();
+      if (existing) { currentVisitorId = existing.id; return existing; }
+      const { data, error } = await window.supabaseClient.auth.signInAnonymously();
+      if (error) throw error;
+      currentVisitorId = data.user.id;
+      return data.user;
+    }
 
     function openAdminPortal() {
       if (isAdminAuthenticated) {
@@ -904,20 +925,41 @@
 
     function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
 
-    function verifyAdminPassword(e) {
+    async function verifyAdminPassword(e) {
       e.preventDefault();
-      if (document.getElementById('adminPasswordInput').value.trim() === ADMIN_PASSWORD) {
+      const errorEl = document.getElementById('adminAuthError');
+      errorEl.classList.add('hidden');
+      try {
+        await supabaseReady;
+        const email = document.getElementById('adminEmailInput').value.trim();
+        const password = document.getElementById('adminPasswordInput').value;
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        const { data: isAdmin, error: roleError } = await window.supabaseClient.rpc('is_amanah_admin');
+        if (roleError) throw roleError;
+        if (!isAdmin) {
+          await window.supabaseClient.auth.signOut();
+          await window.supabaseClient.auth.signInAnonymously();
+          throw new Error('This account is not registered as an Amanah administrator.');
+        }
+        currentVisitorId = data.user.id;
         isAdminAuthenticated = true;
         closeAdminAuthModal();
         document.getElementById('adminModal').classList.remove('hidden');
-      } else {
-        document.getElementById('adminAuthError').classList.remove('hidden');
+        await loadAdminOrders();
+        await loadAdminConversations();
+        subscribeAdminData();
+      } catch (err) {
+        console.error('Admin sign-in failed:', err);
+        errorEl.textContent = err.message || 'Sign-in failed. Check your email and password.';
+        errorEl.classList.remove('hidden');
       }
     }
 
     function lockAdminPortal() {
       isAdminAuthenticated = false;
       document.getElementById('adminModal').classList.add('hidden');
+      window.supabaseClient.auth.signOut().then(() => window.supabaseClient.auth.signInAnonymously()).catch(console.error);
       alert('Admin Portal locked successfully.');
     }
 
@@ -1034,9 +1076,7 @@
 
     let currentProductId = "barakah";
     let selectedPackageQty = 4;
-    let currentOrders = [
-      { ref: "AMN-892301", name: "Juan Dela Cruz", phone: "09171234567", address: "#123 Mabini St., Quezon City", packageTitle: "Buy 4 Packs Barakah Coffee", total: 1700, status: "Pending COD", date: "Today" }
-    ];
+    let currentOrders = [];
     let currentReviews = [
       { name: "Maria Santos", loc: "Davao City", stars: 5, text: "Buy 4 Packs promo is super sulit with free shipping!" },
       { name: "Robert Gonzales", loc: "Cebu City", stars: 5, text: "Baskug Coffee is great for work endurance and daily energy." }
@@ -1055,7 +1095,7 @@
       renderAdminPricingList();
       renderAdminReviews();
       renderAdminFaqs();
-      initInstantMessaging();
+      initInstantMessaging().catch(err => console.error('Chat initialization failed:', err));
     };
 
     function renderThumbnails() {
@@ -1115,24 +1155,35 @@
       document.getElementById("sticky-price-mobile").textContent = "₱" + totalAmt;
     }
 
-    function handleOrderSubmit(e) {
+    async function handleOrderSubmit(e) {
       e.preventDefault();
       const prod = productCatalog[currentProductId];
       const bundle = prod.bundles[selectedPackageQty];
       const totalAmt = bundle.price + bundle.shipping;
-      const refNo = "AMN-" + Math.floor(100000 + Math.random() * 900000);
-      const custName = document.getElementById("fullName").value;
-
-      document.getElementById("modal-ref-no").textContent = refNo;
-      document.getElementById("modal-cust-name").textContent = custName;
-      document.getElementById("modal-cust-address").textContent = document.getElementById("streetAddress").value;
-      document.getElementById("modal-cust-pkg").textContent = `${bundle.title} (${prod.name})`;
-      document.getElementById("modal-cust-total").textContent = "₱" + totalAmt;
-
-      currentOrders.unshift({ ref: refNo, name: custName, phone: document.getElementById("mobileNumber").value, address: document.getElementById("streetAddress").value, packageTitle: `${bundle.title} - ${prod.name}`, total: totalAmt, status: "Pending COD", date: "Just Now" });
-      renderAdminOrders();
-      document.getElementById("successModal").classList.remove("hidden");
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      const refNo = "AMN-" + Date.now().toString().slice(-8);
+      const custName = document.getElementById("fullName").value.trim();
+      const phone = document.getElementById("mobileNumber").value.trim();
+      const address = document.getElementById("streetAddress").value.trim();
+      try {
+        const user = await requireVisitor();
+        const { error } = await window.supabaseClient.from('amanah_orders').insert({
+          ref: refNo, visitor_id: user.id, customer_name: custName, phone, address,
+          package_title: `${bundle.title} - ${prod.name}`, product_id: currentProductId,
+          quantity: bundle.qty, subtotal: bundle.price, shipping: bundle.shipping,
+          total: totalAmt, status: 'Pending COD'
+        });
+        if (error) throw error;
+        document.getElementById("modal-ref-no").textContent = refNo;
+        document.getElementById("modal-cust-name").textContent = custName;
+        document.getElementById("modal-cust-address").textContent = address;
+        document.getElementById("modal-cust-pkg").textContent = `${bundle.title} (${prod.name})`;
+        document.getElementById("modal-cust-total").textContent = "₱" + totalAmt;
+        document.getElementById("successModal").classList.remove("hidden");
+        if (window.confetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      } catch (err) {
+        console.error('Order submission failed:', err);
+        alert('We could not save your order. Please refresh and try again. ' + (err.message || ''));
+      }
     }
 
     function closeSuccessModal() { document.getElementById("successModal").classList.add("hidden"); }
@@ -1173,22 +1224,29 @@
     function renderAdminOrders() {
       document.getElementById("admin-orders-count").textContent = currentOrders.length;
       document.getElementById("stat-total-orders").textContent = currentOrders.length;
-      document.getElementById("stat-pending-orders").textContent = currentOrders.filter(o => o.status.includes("Pending")).length;
-      document.getElementById("stat-total-revenue").textContent = "₱" + currentOrders.reduce((acc, o) => acc + o.total, 0).toLocaleString();
-
+      document.getElementById("stat-pending-orders").textContent = currentOrders.filter(o => String(o.status).includes("Pending")).length;
+      document.getElementById("stat-total-revenue").textContent = "₱" + currentOrders.reduce((acc, o) => acc + Number(o.total || 0), 0).toLocaleString();
       document.getElementById("admin-orders-tbody").innerHTML = currentOrders.map(o => `
         <tr class="hover:bg-gray-50 border-b">
           <td class="p-3 font-mono font-bold text-emerald-800">${o.ref}</td>
           <td class="p-3 font-bold">${o.name}<br/><span class="text-[10px] text-gray-400">${o.phone}</span></td>
-          <td class="p-3">${o.address}</td>
-          <td class="p-3">${o.packageTitle}</td>
+          <td class="p-3">${o.address}</td><td class="p-3">${o.packageTitle}</td>
           <td class="p-3 font-black text-emerald-700">₱${o.total}</td>
           <td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-bold">${o.status}</span></td>
-          <td class="p-3"><button onclick="alert('Dispatched!')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[10px]">Dispatch</button></td>
-        </tr>
-      `).join("");
+          <td class="p-3"><button onclick="updateOrderStatus('${o.id}','Dispatched')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[10px]">Dispatch</button></td>
+        </tr>`).join("");
     }
-
+    async function loadAdminOrders() {
+      const { data, error } = await window.supabaseClient.from('amanah_orders').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      currentOrders = (data || []).map(o => ({id:o.id,ref:o.ref,name:o.customer_name,phone:o.phone,address:o.address,packageTitle:o.package_title,total:Number(o.total),status:o.status,date:o.created_at}));
+      renderAdminOrders();
+    }
+    async function updateOrderStatus(id,status) {
+      const {error}=await window.supabaseClient.from('amanah_orders').update({status}).eq('id',id);
+      if(error){alert('Could not update order: '+error.message);return;}
+      await loadAdminOrders();
+    }
     function renderAdminPricingList() {
       document.getElementById("admin-product-pricing-list").innerHTML = Object.keys(productCatalog).map(id => {
         const prod = productCatalog[id];
@@ -1205,268 +1263,120 @@
     // =========================================================================
     // INSTANT REAL-TIME MESSAGING & AI DELIVERY FLOW (NAME ONLY + DELIVERY FORM)
     // =========================================================================
-    let customerSession = { id: 'conv_101', name: '' };
-    let activeAdminConvId = 'conv_101';
-    let chatState = 'normal'; // 'normal' | 'awaiting_delivery_confirmation' | 'collecting_delivery_form' | 'awaiting_proceed_confirmation'
+    let customerSession = { id: null, name: '' };
+    let activeAdminConvId = null;
+    let chatState = 'normal';
     let realtimeChannel = null;
+    let DB = { conversations: [], messages: [] };
 
-    let DB = {
-      conversations: [{ id: 'conv_101', customer_name: 'Juan Dela Cruz', status: 'active', last_message: 'Hello!' }],
-      messages: [
-        { id: 'm1', conversation_id: 'conv_101', sender_type: 'ai', message: 'Welcome to Amanah! How may I help you today?', time: '10:00 AM' }
-      ]
-    };
-
-    function initInstantMessaging() {
-      renderAdminMessages();
-      subscribeToRealtimeMessages('conv_101');
-    }
-
-    // SUPABASE REALTIME: listen for messages in the selected conversation.
-    // Requires public.chat_messages to be added to the supabase_realtime publication
-    // and SELECT policies that permit the intended participants to read messages.
-    function subscribeToRealtimeMessages(conversationId) {
-      if (!window.supabaseClient) {
-        console.error('Supabase client is not initialized; chat is local only.');
-        return;
-      }
-
-      if (realtimeChannel) {
-        window.supabaseClient.removeChannel(realtimeChannel).catch((error) => {
-          console.warn('Could not remove previous chat channel:', error);
-        });
-        realtimeChannel = null;
-      }
-
-      realtimeChannel = window.supabaseClient
-        .channel('amanah-chat-' + conversationId)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: 'conversation_id=eq.' + conversationId
-        }, ({ new: row }) => {
-          if (!row || !row.message) return;
-
-          // Do not echo a visitor's own message back into their chat.
-          const isCustomerView = Boolean(customerSession.name);
-          if (isCustomerView && row.sender_type === 'customer') return;
-          if (!isCustomerView && row.sender_type !== 'customer') return;
-
-          if (DB.messages.some((message) => message.id === row.id)) return;
-          const timeStr = row.created_at
-            ? new Date(row.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-          DB.messages.push({
-            id: row.id || ('remote_' + Date.now()),
-            conversation_id: row.conversation_id,
-            sender_type: row.sender_type || 'admin',
-            message: row.message,
-            time: timeStr
-          });
-
-          renderCustomerMessages();
-          renderAdminMessages();
-        })
-        .subscribe((status, error) => {
-          console.log('Amanah chat Realtime status:', status);
-          if (error) console.error('Amanah chat Realtime error:', error);
-        });
-    }
-
-    function toggleCustomerChatWidget() {
-      const win = document.getElementById('customerChatWindow');
-      win.classList.toggle('hidden');
-      if (!win.classList.contains('hidden')) {
+    async function initInstantMessaging() {
+      try {
+        await requireVisitor();
         renderCustomerView();
-      }
+      } catch (e) { console.error('Visitor auth failed:', e); }
     }
-
-    function openCustomerChatWidget() {
-      document.getElementById('customerChatWindow').classList.remove('hidden');
-      renderCustomerView();
+    function addMessage(row) {
+      if (!row || DB.messages.some(m => m.id === row.id)) return;
+      DB.messages.push({...row,time:new Date(row.created_at || Date.now()).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
     }
-
-    function closeCustomerChatWidget() {
-      document.getElementById('customerChatWindow').classList.add('hidden');
+    async function loadConversationMessages(id) {
+      const {data,error}=await window.supabaseClient.from('amanah_messages').select('*').eq('conversation_id',id).order('created_at',{ascending:true});
+      if(error) throw error;
+      DB.messages=DB.messages.filter(m=>m.conversation_id!==id);
+      (data||[]).forEach(addMessage);
+      renderCustomerMessages(); renderAdminMessages();
     }
-
-    function renderCustomerView() {
-      if (customerSession.name) {
-        document.getElementById('customerAuthScreen').classList.add('hidden');
-        document.getElementById('customerActiveScreen').classList.remove('hidden');
-        renderCustomerMessages();
-      } else {
-        document.getElementById('customerAuthScreen').classList.remove('hidden');
-        document.getElementById('customerActiveScreen').classList.add('hidden');
-      }
+    function subscribeToRealtimeMessages(conversationId) {
+      if(realtimeChannel) window.supabaseClient.removeChannel(realtimeChannel);
+      realtimeChannel=window.supabaseClient.channel('amanah-chat-'+conversationId)
+        .on('postgres_changes',{event:'INSERT',schema:'public',table:'amanah_messages',filter:'conversation_id=eq.'+conversationId},({new:row})=>{
+          addMessage(row); renderCustomerMessages(); renderAdminMessages();
+          if(isAdminAuthenticated) loadAdminConversations().catch(console.error);
+        }).subscribe();
     }
-
-    function initCustomerSession() {
-      const name = document.getElementById('custInputName').value.trim();
-      if (!name) {
-        alert('Please enter your name.');
-        return;
-      }
-
-      customerSession.name = name;
-      customerSession.id = 'conv_' + Date.now();
-      activeAdminConvId = customerSession.id;
-
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      DB.conversations.unshift({ id: customerSession.id, customer_name: name, status: 'active', last_message: 'Started conversation' });
-
-      DB.messages.push({
-        id: 'msg_welcome_' + Date.now(),
-        conversation_id: customerSession.id,
-        sender_type: 'ai',
-        message: `Hello ${name}! Welcome to Amanah Health & Wellness AI Support. Would you like to proceed with your order delivery now?`,
-        time: timeStr
-      });
-
-      subscribeToRealtimeMessages(customerSession.id);
-      renderCustomerView();
+    function subscribeAdminData() {
+      if(ordersChannel) window.supabaseClient.removeChannel(ordersChannel);
+      if(conversationsChannel) window.supabaseClient.removeChannel(conversationsChannel);
+      ordersChannel=window.supabaseClient.channel('amanah-orders-admin')
+        .on('postgres_changes',{event:'*',schema:'public',table:'amanah_orders'},()=>loadAdminOrders().catch(console.error)).subscribe();
+      conversationsChannel=window.supabaseClient.channel('amanah-conversations-admin')
+        .on('postgres_changes',{event:'*',schema:'public',table:'amanah_conversations'},()=>loadAdminConversations().catch(console.error))
+        .on('postgres_changes',{event:'INSERT',schema:'public',table:'amanah_messages'},()=>loadAdminConversations().catch(console.error)).subscribe();
+    }
+    async function loadAdminConversations() {
+      const {data,error}=await window.supabaseClient.from('amanah_conversations').select('*').order('updated_at',{ascending:false});
+      if(error) throw error;
+      DB.conversations=data||[];
+      if(!activeAdminConvId && DB.conversations.length) activeAdminConvId=DB.conversations[0].id;
       renderAdminConversations();
+      if(activeAdminConvId) { await loadConversationMessages(activeAdminConvId); subscribeToRealtimeMessages(activeAdminConvId); }
     }
-
-    function renderCustomerMessages() {
-      const stream = document.getElementById('customerMessagesStream');
-      if (!stream) return;
-      stream.innerHTML = '';
-
-      const msgs = DB.messages.filter(m => m.conversation_id === customerSession.id);
-      msgs.forEach(m => {
-        const isUser = m.sender_type === 'customer';
-        const isAi = m.sender_type === 'ai';
-        const bubbleClass = isUser ? 'chat-bubble-user text-white self-end' : (isAi ? 'chat-bubble-ai text-emerald-950' : 'chat-bubble-agent text-slate-800');
-        
-        const div = document.createElement('div');
-        div.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'}`;
-        div.innerHTML = `
-          <div class="max-w-[85%] rounded-xl p-2.5 text-xs space-y-1 shadow-sm ${bubbleClass}">
-            <div class="flex items-center justify-between space-x-3 opacity-75 text-[10px] font-semibold border-b border-black/5 pb-1">
-              <span>${isUser ? 'You' : (isAi ? 'Amanah AI' : 'Support Agent')}</span>
-              <span>${m.time}</span>
-            </div>
-            <div class="whitespace-pre-wrap leading-relaxed">${m.message}</div>
-          </div>
-        `;
-        stream.appendChild(div);
-      });
-      stream.scrollTop = stream.scrollHeight;
+    function toggleCustomerChatWidget(){const w=document.getElementById('customerChatWindow');w.classList.toggle('hidden');if(!w.classList.contains('hidden'))renderCustomerView();}
+    function openCustomerChatWidget(){document.getElementById('customerChatWindow').classList.remove('hidden');renderCustomerView();}
+    function closeCustomerChatWidget(){document.getElementById('customerChatWindow').classList.add('hidden');}
+    function renderCustomerView(){
+      if(customerSession.name){document.getElementById('customerAuthScreen').classList.add('hidden');document.getElementById('customerActiveScreen').classList.remove('hidden');renderCustomerMessages();}
+      else {document.getElementById('customerAuthScreen').classList.remove('hidden');document.getElementById('customerActiveScreen').classList.add('hidden');}
     }
-
-    function renderAdminMessages() {
-      const stream = document.getElementById('adminMessagesStream');
-      if (!stream) return;
-      stream.innerHTML = '';
-
-      const msgs = DB.messages.filter(m => m.conversation_id === activeAdminConvId);
-      msgs.forEach(m => {
-        const isUser = m.sender_type === 'customer';
-        const isAi = m.sender_type === 'ai';
-        const bubbleClass = isUser ? 'chat-bubble-user text-white self-start' : (isAi ? 'chat-bubble-ai text-emerald-950' : 'chat-bubble-agent text-slate-800 self-end');
-
-        const div = document.createElement('div');
-        div.className = `flex flex-col ${isUser ? 'items-start' : 'items-end'}`;
-        div.innerHTML = `
-          <div class="max-w-[85%] rounded-xl p-2.5 text-xs space-y-1 shadow-sm ${bubbleClass}">
-            <div class="flex items-center justify-between space-x-3 opacity-75 text-[10px] font-semibold border-b border-black/5 pb-1">
-              <span>${isUser ? 'Customer' : (isAi ? 'Amanah AI' : 'Agent')}</span>
-              <span>${m.time}</span>
-            </div>
-            <div class="whitespace-pre-wrap leading-relaxed">${m.message}</div>
-          </div>
-        `;
-        stream.appendChild(div);
-      });
-      stream.scrollTop = stream.scrollHeight;
+    async function initCustomerSession(){
+      const name=document.getElementById('custInputName').value.trim();
+      if(!name){alert('Please enter your name.');return;}
+      try{
+        const user=await requireVisitor();
+        const id='conv_'+user.id;
+        const {data,error}=await window.supabaseClient.from('amanah_conversations').upsert({id,visitor_id:user.id,customer_name:name,status:'active',last_message:'Started conversation',updated_at:new Date().toISOString()},{onConflict:'id'}).select().single();
+        if(error) throw error;
+        customerSession={id:data.id,name}; activeAdminConvId=data.id;
+        const welcome='Hello '+name+'! Welcome to Amanah Health & Wellness AI Support. How may we help you today?';
+        const {data:existing}=await window.supabaseClient.from('amanah_messages').select('id').eq('conversation_id',id).limit(1);
+        if(!existing?.length) await persistChatMessage(id,user.id,'ai',welcome);
+        await loadConversationMessages(id); subscribeToRealtimeMessages(id); renderCustomerView();
+      }catch(err){console.error(err);alert('Could not start chat: '+err.message);}
     }
-
-    function renderAdminConversations() {
-      const list = document.getElementById('conversationList');
-      if (!list) return;
-      list.innerHTML = DB.conversations.map(c => `
-        <div onclick="selectAdminConversation('${c.id}')" class="p-3 cursor-pointer hover:bg-slate-100 ${c.id === activeAdminConvId ? 'bg-emerald-50 border-l-4 border-emerald-600' : ''}">
-          <h5 class="font-bold text-xs text-slate-800">${c.customer_name}</h5>
-          <p class="text-[11px] text-slate-500 truncate">${c.last_message}</p>
-        </div>
-      `).join('');
+    async function persistChatMessage(conversationId,visitorId,senderType,message){
+      const {error}=await window.supabaseClient.from('amanah_messages').insert({conversation_id:conversationId,visitor_id:visitorId,sender_type:senderType,message});
+      if(error) throw error;
+      await window.supabaseClient.from('amanah_conversations').update({last_message:message,updated_at:new Date().toISOString()}).eq('id',conversationId);
     }
-
-    function selectAdminConversation(convId) {
-      activeAdminConvId = convId;
-      subscribeToRealtimeMessages(convId);
-      renderAdminConversations();
-      renderAdminMessages();
+    function renderCustomerMessages(){
+      const stream=document.getElementById('customerMessagesStream');if(!stream)return;stream.innerHTML='';
+      DB.messages.filter(m=>m.conversation_id===customerSession.id).forEach(m=>{
+        const user=m.sender_type==='customer',ai=m.sender_type==='ai';
+        const div=document.createElement('div');div.className='flex flex-col '+(user?'items-end':'items-start');
+        const bubble=document.createElement('div');bubble.className='max-w-[85%] rounded-xl p-2.5 text-xs shadow-sm whitespace-pre-wrap '+(user?'chat-bubble-user text-white':ai?'chat-bubble-ai text-emerald-950':'chat-bubble-agent text-slate-800');
+        bubble.textContent=m.message;div.appendChild(bubble);stream.appendChild(div);
+      });stream.scrollTop=stream.scrollHeight;
     }
-
-    function sendQuickChip(chipText) {
-      document.getElementById('customerMessageInput').value = chipText;
-      sendCustomerMessage();
+    function renderAdminMessages(){
+      const stream=document.getElementById('adminMessagesStream');if(!stream)return;stream.innerHTML='';
+      DB.messages.filter(m=>m.conversation_id===activeAdminConvId).forEach(m=>{
+        const user=m.sender_type==='customer',ai=m.sender_type==='ai';
+        const div=document.createElement('div');div.className='flex flex-col '+(user?'items-start':'items-end');
+        const bubble=document.createElement('div');bubble.className='max-w-[85%] rounded-xl p-2.5 text-xs shadow-sm whitespace-pre-wrap '+(user?'chat-bubble-user text-white':ai?'chat-bubble-ai text-emerald-950':'chat-bubble-agent text-slate-800');
+        bubble.textContent=m.message;div.appendChild(bubble);stream.appendChild(div);
+      });stream.scrollTop=stream.scrollHeight;
     }
-
-    function handleKeyPress(e, mode) {
-      if (e.key === 'Enter') {
-        if (mode === 'customer') sendCustomerMessage();
-        if (mode === 'admin') sendAdminReply();
-      }
+    function renderAdminConversations(){
+      const list=document.getElementById('conversationList');if(!list)return;
+      list.innerHTML=DB.conversations.map(c=>'<div onclick="selectAdminConversation(\''+c.id+'\')" class="p-3 cursor-pointer hover:bg-slate-100 '+(c.id===activeAdminConvId?'bg-emerald-50 border-l-4 border-emerald-600':'')+'"><h5 class="font-bold text-xs">'+escapeHtml(c.customer_name)+'</h5><p class="text-[11px] text-slate-500 truncate">'+escapeHtml(c.last_message||'')+'</p></div>').join('');
     }
-
-    function sendCustomerMessage() {
-      const input = document.getElementById('customerMessageInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const newMsg = { id: 'msg_' + Date.now(), conversation_id: customerSession.id, sender_type: 'customer', message: text, time: timeStr };
-
-      DB.messages.push(newMsg);
-      input.value = '';
-      renderCustomerMessages();
-      renderAdminMessages();
-
-      // Broadcast to Supabase database if connected
-      if (window.supabaseClient) {
-        window.supabaseClient.from('chat_messages').insert([{
-          conversation_id: customerSession.id,
-          sender_id: customerSession.name,
-          sender_type: 'customer',
-          message: text
-        }]).then(() => {}).catch(() => {});
-      }
-
-      // Process AI response logic with delivery prompt workflow
-      processAiResponse(text);
+    function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    async function selectAdminConversation(id){activeAdminConvId=id;await loadConversationMessages(id);subscribeToRealtimeMessages(id);renderAdminConversations();document.getElementById('chatCustomerName').textContent=DB.conversations.find(c=>c.id===id)?.customer_name||'Customer';}
+    function sendQuickChip(t){document.getElementById('customerMessageInput').value=t;sendCustomerMessage();}
+    function handleKeyPress(e,mode){if(e.key==='Enter'){if(mode==='customer')sendCustomerMessage();if(mode==='admin')sendAdminReply();}}
+    async function sendCustomerMessage(){
+      const input=document.getElementById('customerMessageInput'),message=input.value.trim();if(!message||!customerSession.id)return;
+      input.value='';
+      try{const user=await requireVisitor();await persistChatMessage(customerSession.id,user.id,'customer',message);await loadConversationMessages(customerSession.id);processAiResponse(message);}
+      catch(e){console.error(e);alert('Message could not be sent: '+e.message);}
     }
-
-    function sendAdminReply() {
-      const input = document.getElementById('adminMessageInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const newMsg = { id: 'msg_' + Date.now(), conversation_id: activeAdminConvId, sender_type: 'admin', message: text, time: timeStr };
-
-      DB.messages.push(newMsg);
-      input.value = '';
-      renderCustomerMessages();
-      renderAdminMessages();
-
-      // Persist admin replies so the customer's Realtime subscription can receive them.
-      if (window.supabaseClient) {
-        window.supabaseClient.from('chat_messages').insert([{
-          conversation_id: activeAdminConvId,
-          sender_id: 'admin',
-          sender_type: 'admin',
-          message: text
-        }]).then(({ error }) => {
-          if (error) console.error('Could not save admin reply:', error.message);
-        });
-      }
+    async function sendAdminReply(){
+      const input=document.getElementById('adminMessageInput'),message=input.value.trim();if(!message||!activeAdminConvId)return;
+      input.value='';
+      try{const {data:conv,error:convError}=await window.supabaseClient.from('amanah_conversations').select('visitor_id').eq('id',activeAdminConvId).single();if(convError)throw convError;
+        await persistChatMessage(activeAdminConvId,conv.visitor_id,'admin',message);await loadConversationMessages(activeAdminConvId);}
+      catch(e){console.error(e);alert('Reply could not be sent: '+e.message);}
     }
-
     function processAiResponse(userText) {
       const lower = userText.toLowerCase();
       const indicator = document.getElementById('customerTypingIndicator');
@@ -1490,16 +1400,9 @@
           replyMsg = `Thank you for your message! Would you like us to deliver your Amanah Wellness products now?`;
         }
 
-        DB.messages.push({
-          id: 'msg_ai_' + Date.now(),
-          conversation_id: customerSession.id,
-          sender_type: 'ai',
-          message: replyMsg,
-          time: timeStr
-        });
-
-        renderCustomerMessages();
-        renderAdminMessages();
+        persistChatMessage(customerSession.id,currentVisitorId,'ai',replyMsg)
+          .then(()=>loadConversationMessages(customerSession.id))
+          .catch(err=>console.error('Could not save AI response:',err));
       }, 800);
     }
   </script>
