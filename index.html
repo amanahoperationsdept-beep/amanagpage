@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Amanah Health & Wellness - Official Store, AI Assistant & Admin Portal</title>
   
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Production Tailwind CSS compiled by the GitHub Actions build -->
+  <link rel="stylesheet" href="./assets/tailwind.css" />
+  <!-- Amanah site favicon -->
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <!-- Google Fonts: Plus Jakarta Sans & Inter -->
@@ -16,41 +18,7 @@
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#f0fdf4',
-              100: '#dcfce7',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-              800: '#166534',
-              900: '#14532d',
-              gold: '#D4AF37',
-              goldDark: '#AA7C11'
-            },
-            amanah: {
-              50: '#f0fdf4',
-              100: '#dcfce7',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-              800: '#166534',
-              900: '#14532d',
-              dark: '#0b2b1a',
-              gold: '#d97706'
-            }
-          }
-        }
-      }
-    }
-  </script>
+
 
   <style>
     html { scroll-behavior: smooth; }
@@ -904,22 +872,20 @@
             return;
         }
 
-        // Initialize Supabase Client without realtime auto-reconnect loops to prevent console errors
+        // Realtime must remain enabled for customer/admin chat.
+        // createClient() builds /rest/v1 and /realtime/v1 endpoints from the root URL.
         window.supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
             SUPABASE_PUBLISHABLE_KEY,
             {
-              auth: {
-                persistSession: false
-              },
+              auth: { persistSession: false },
               realtime: {
-                enabled: false,
-                autoConnect: false
+                params: { eventsPerSecond: 10 }
               }
             }
         );
 
-        console.log("Supabase connected cleanly without WebSocket retries!");
+        console.log("Supabase client initialized with Realtime enabled.");
     })();
 
     let isAdminAuthenticated = false;
@@ -1256,17 +1222,57 @@
       subscribeToRealtimeMessages('conv_101');
     }
 
-    // SUPABASE REALTIME CHANNEL SUBSCRIPTION
+    // SUPABASE REALTIME: listen for messages in the selected conversation.
+    // Requires public.chat_messages to be added to the supabase_realtime publication
+    // and SELECT policies that permit the intended participants to read messages.
     function subscribeToRealtimeMessages(conversationId) {
+      if (!window.supabaseClient) {
+        console.error('Supabase client is not initialized; chat is local only.');
+        return;
+      }
+
       if (realtimeChannel) {
-        try {
-          window.supabaseClient?.removeChannel(realtimeChannel);
-        } catch (e) {}
+        window.supabaseClient.removeChannel(realtimeChannel).catch((error) => {
+          console.warn('Could not remove previous chat channel:', error);
+        });
         realtimeChannel = null;
       }
 
-      // Explicitly prevent WebSocket connection retries that trigger red DevTools console errors
-      console.log('Realtime socket polling bypassed for clean execution.');
+      realtimeChannel = window.supabaseClient
+        .channel('amanah-chat-' + conversationId)
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: 'conversation_id=eq.' + conversationId
+        }, ({ new: row }) => {
+          if (!row || !row.message) return;
+
+          // Do not echo a visitor's own message back into their chat.
+          const isCustomerView = Boolean(customerSession.name);
+          if (isCustomerView && row.sender_type === 'customer') return;
+          if (!isCustomerView && row.sender_type !== 'customer') return;
+
+          if (DB.messages.some((message) => message.id === row.id)) return;
+          const timeStr = row.created_at
+            ? new Date(row.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          DB.messages.push({
+            id: row.id || ('remote_' + Date.now()),
+            conversation_id: row.conversation_id,
+            sender_type: row.sender_type || 'admin',
+            message: row.message,
+            time: timeStr
+          });
+
+          renderCustomerMessages();
+          renderAdminMessages();
+        })
+        .subscribe((status, error) => {
+          console.log('Amanah chat Realtime status:', status);
+          if (error) console.error('Amanah chat Realtime error:', error);
+        });
     }
 
     function toggleCustomerChatWidget() {
@@ -1447,6 +1453,18 @@
       input.value = '';
       renderCustomerMessages();
       renderAdminMessages();
+
+      // Persist admin replies so the customer's Realtime subscription can receive them.
+      if (window.supabaseClient) {
+        window.supabaseClient.from('chat_messages').insert([{
+          conversation_id: activeAdminConvId,
+          sender_id: 'admin',
+          sender_type: 'admin',
+          message: text
+        }]).then(({ error }) => {
+          if (error) console.error('Could not save admin reply:', error.message);
+        });
+      }
     }
 
     function processAiResponse(userText) {

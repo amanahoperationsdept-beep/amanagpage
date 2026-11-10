@@ -1,6 +1,8 @@
 (() => {
     // SUPABASE CONFIGURATION
-    const SUPABASE_URL = "https://bmtikgyesxutrrupudph.supabase.co/rest/v1/";
+    // Pass the project root URL to createClient(). Do not append /rest/v1;
+    // supabase-js constructs the REST and Realtime endpoints itself.
+    const SUPABASE_URL = "https://bmtikgyesxutrrupudph.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IDm_YKqPXQjIMXu-k5eqWA_LXMpdTvV";
 
     // Check whether Supabase library is loaded
@@ -15,11 +17,17 @@
         return;
     }
 
-    // Create one shared client
+    // Create one shared client. Client creation does not by itself prove
+    // that the project is reachable; verify actual requests in the app.
     window.supabaseClient = window.supabase.createClient(
         SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+            auth: {
+                persistSession: false
+            }
+        }
     );
 
-    console.log("Supabase connected successfully!");
+    console.log("Supabase client initialized.");
 })();
