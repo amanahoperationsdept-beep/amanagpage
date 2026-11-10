@@ -167,7 +167,8 @@ begin
   end loop;
 end $$;
 
--- AFTER creating the administrator in Authentication > Users, run this separately:
--- insert into public.admin_users (user_id)
--- values ('PASTE-ADMIN-AUTH-USER-UUID-HERE')
--- on conflict (user_id) do nothing;
+-- Register the administrator Auth user. This UUID must belong to an existing
+-- user in Supabase Authentication > Users.
+insert into public.admin_users (user_id)
+values ('365e59b0-84a2-4d7a-9ddc-588b2d0af14e')
+on conflict (user_id) do nothing;
