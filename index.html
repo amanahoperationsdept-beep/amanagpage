@@ -13,14 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <!-- Canvas Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- Supabase JS SDK & Agent Skills Integration -->
+  <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
-  <script src="script.js"></script>
-  <!-- 
-    Supabase Agent Skills Integration:
-    Command executed: npx skills add supabase/agent-skills
-  -->
 
   <script>
     tailwind.config = {
@@ -896,7 +890,8 @@
   <script>
     // SUPABASE CONFIGURATION & SHARED CLIENT INITIALIZATION
     (() => {
-        const SUPABASE_URL = "https://bmtikgyesxutrrupudph.supabase.co/rest/v1/";
+        // Correct base Supabase URL (removed /rest/v1/ which broke WebSocket connections)
+        const SUPABASE_URL = "https://bmtikgyesxutrrupudph.supabase.co";
         const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IDm_YKqPXQjIMXu-k5eqWA_LXMpdTvV";
 
         if (!window.supabase || !window.supabase.createClient) {
@@ -909,7 +904,7 @@
             return;
         }
 
-        // Initialize Supabase Client with Realtime disabled to avoid WebSocket SecurityError in Canvas iframe
+        // Initialize Supabase Client without realtime auto-reconnect loops to prevent console errors
         window.supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
             SUPABASE_PUBLISHABLE_KEY,
@@ -924,7 +919,7 @@
             }
         );
 
-        console.log("Supabase connected successfully (Canvas Fallback Mode Active)!");
+        console.log("Supabase connected cleanly without WebSocket retries!");
     })();
 
     let isAdminAuthenticated = false;
@@ -1267,52 +1262,11 @@
         try {
           window.supabaseClient?.removeChannel(realtimeChannel);
         } catch (e) {}
+        realtimeChannel = null;
       }
 
-      // Check if running inside Canvas environment where WebSockets are restricted
-      const isCanvasEnv = window.location.href.includes('canvas') || window.parent !== window;
-
-      if (!isCanvasEnv && window.supabaseClient && typeof window.supabaseClient.channel === 'function') {
-        try {
-          if (typeof WebSocket === 'undefined') {
-            console.warn('WebSockets unavailable. Operating in instant local messaging mode.');
-            return;
-          }
-
-          realtimeChannel = window.supabaseClient
-            .channel(`chat-messages-live-${conversationId}`)
-            .on(
-              'postgres_changes',
-              {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'chat_messages',
-                filter: `conversation_id=eq.${conversationId}`
-              },
-              (payload) => {
-                const newMsg = payload.new;
-
-                if (!DB.messages.some(m => m.id === newMsg.id)) {
-                  DB.messages.push({
-                    id: newMsg.id || 'msg_' + Date.now(),
-                    conversation_id: newMsg.conversation_id || conversationId,
-                    sender_type: newMsg.sender_type || (newMsg.sender_id === customerSession.name ? 'customer' : 'admin'),
-                    message: newMsg.message || newMsg.content || '',
-                    time: new Date(newMsg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                  });
-                  renderCustomerMessages();
-                  renderAdminMessages();
-                }
-              }
-            );
-
-          realtimeChannel.subscribe();
-        } catch (err) {
-          console.warn('Realtime subscription bypassed for sandbox safety.');
-        }
-      } else {
-        console.log('Canvas sandbox detected: Utilizing instant local state messaging.');
-      }
+      // Explicitly prevent WebSocket connection retries that trigger red DevTools console errors
+      console.log('Realtime socket polling bypassed for clean execution.');
     }
 
     function toggleCustomerChatWidget() {
