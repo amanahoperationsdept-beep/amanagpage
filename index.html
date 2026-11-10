@@ -904,11 +904,12 @@
     })();
 
     async function requireVisitor() {
-      await supabaseReady;
-      const { data: { user } } = await window.supabaseClient.auth.getUser();
-      if (!user) throw new Error("Visitor session is unavailable. Refresh and try again.");
-      currentVisitorId = user.id;
-      return user;
+      const { data: { user: existing } } = await window.supabaseClient.auth.getUser();
+      if (existing) { currentVisitorId = existing.id; return existing; }
+      const { data, error } = await window.supabaseClient.auth.signInAnonymously();
+      if (error) throw error;
+      currentVisitorId = data.user.id;
+      return data.user;
     }
 
     function openAdminPortal() {
@@ -958,8 +959,7 @@
     function lockAdminPortal() {
       isAdminAuthenticated = false;
       document.getElementById('adminModal').classList.add('hidden');
-      window.supabaseClient.auth.signOut().catch(console.error);
-      supabaseReady = null;
+      window.supabaseClient.auth.signOut().then(() => window.supabaseClient.auth.signInAnonymously()).catch(console.error);
       alert('Admin Portal locked successfully.');
     }
 
@@ -1076,9 +1076,7 @@
 
     let currentProductId = "barakah";
     let selectedPackageQty = 4;
-    let currentOrders = [
-      { ref: "AMN-892301", name: "Juan Dela Cruz", phone: "09171234567", address: "#123 Mabini St., Quezon City", packageTitle: "Buy 4 Packs Barakah Coffee", total: 1700, status: "Pending COD", date: "Today" }
-    ];
+    let currentOrders = [];
     let currentReviews = [
       { name: "Maria Santos", loc: "Davao City", stars: 5, text: "Buy 4 Packs promo is super sulit with free shipping!" },
       { name: "Robert Gonzales", loc: "Cebu City", stars: 5, text: "Baskug Coffee is great for work endurance and daily energy." }
