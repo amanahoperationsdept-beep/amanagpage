@@ -942,9 +942,9 @@
         const { data: isAdmin, error: roleError } = await window.supabaseClient.rpc('is_amanah_admin');
         if (roleError) throw roleError;
         if (!isAdmin) {
+          // Do not require anonymous sign-in just to report an invalid admin role.
           await window.supabaseClient.auth.signOut();
-          await window.supabaseClient.auth.signInAnonymously();
-          throw new Error('This account is not registered as an Amanah administrator.');
+          throw new Error('This account is not registered as an Amanah administrator. Ask the project owner to add its Auth user ID to public.admin_users.');
         }
         currentVisitorId = data.user.id;
         isAdminAuthenticated = true;
