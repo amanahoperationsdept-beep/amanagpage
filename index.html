@@ -1237,6 +1237,7 @@
     let customerSession = { id: 'conv_101', name: '' };
     let activeAdminConvId = 'conv_101';
     let chatState = 'normal'; // 'normal' | 'awaiting_delivery_confirmation' | 'collecting_delivery_form' | 'awaiting_proceed_confirmation'
+    let realtimeChannel = null;
 
     let DB = {
       conversations: [{ id: 'conv_101', customer_name: 'Juan Dela Cruz', status: 'active', last_message: 'Hello!' }],
@@ -1247,6 +1248,52 @@
 
     function initInstantMessaging() {
       renderAdminMessages();
+      subscribeToRealtimeMessages('conv_101');
+    }
+
+    // SUPABASE REALTIME CHANNEL SUBSCRIPTION
+    function subscribeToRealtimeMessages(conversationId) {
+      if (realtimeChannel) {
+        window.supabaseClient?.removeChannel(realtimeChannel);
+      }
+
+      if (window.supabaseClient && window.supabaseClient.channel) {
+        try {
+          realtimeChannel = window.supabaseClient
+            .channel(`chat-messages-live-${conversationId}`)
+            .on(
+              'postgres_changes',
+              {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'chat_messages',
+                filter: `conversation_id=eq.${conversationId}`
+              },
+              (payload) => {
+                console.log('New message:', payload.new);
+                const newMsg = payload.new;
+
+                // Prevent duplicate insertion if already added locally
+                if (!DB.messages.some(m => m.id === newMsg.id)) {
+                  DB.messages.push({
+                    id: newMsg.id || 'msg_' + Date.now(),
+                    conversation_id: newMsg.conversation_id || conversationId,
+                    sender_type: newMsg.sender_type || (newMsg.sender_id === customerSession.name ? 'customer' : 'admin'),
+                    message: newMsg.message || newMsg.content || '',
+                    time: new Date(newMsg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                  });
+                  renderCustomerMessages();
+                  renderAdminMessages();
+                }
+              }
+            )
+            .subscribe((status) => {
+              console.log('Realtime subscription status:', status);
+            });
+        } catch (err) {
+          console.warn('Realtime channel fallback mode active:', err);
+        }
+      }
     }
 
     function toggleCustomerChatWidget() {
@@ -1270,6 +1317,9 @@
       DB.conversations.unshift({ id: customerSession.id, customer_name: nameInput, status: 'active', last_message: 'Session started' });
       activeAdminConvId = customerSession.id;
 
+      // Subscribe to Supabase Realtime channel for this conversation
+      subscribeToRealtimeMessages(customerSession.id);
+
       document.getElementById("customerAuthScreen").classList.add("hidden");
       document.getElementById("customerActiveScreen").classList.remove("hidden");
 
@@ -1279,90 +1329,33 @@
 
     function appendMessage(senderType, text) {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      DB.messages.push({
-        id: 'msg_' + Date.now(),
+      const msgId = 'msg_' + Date.now();
+      const msgObj = {
+        id: msgId,
         conversation_id: customerSession.id,
         sender_type: senderType,
         message: text,
         time: timeStr
-      });
+      };
+
+      DB.messages.push(msgObj);
       renderCustomerMessages();
       renderAdminMessages();
-    }
 
-    function renderCustomerMessages() {
-      const stream = document.getElementById("customerMessagesStream");
-      stream.innerHTML = DB.messages.filter(m => m.conversation_id === customerSession.id).map(m => `
-        <div class="flex ${m.sender_type === 'customer' ? 'justify-end' : 'justify-start'}">
-          <div class="max-w-[85%] rounded-xl p-2.5 text-xs space-y-1 ${m.sender_type === 'customer' ? 'chat-bubble-user text-white' : 'chat-bubble-ai text-gray-900'}">
-            <div class="flex justify-between text-[10px] font-bold opacity-75 border-b border-black/5 pb-0.5">
-              <span>${m.sender_type === 'customer' ? customerSession.name : 'Amanah AI'}</span>
-              <span>${m.time}</span>
-            </div>
-            <p class="whitespace-pre-wrap">${m.message}</p>
-          </div>
-        </div>
-      `).join("");
-      stream.scrollTop = stream.scrollHeight;
-    }
-
-    function sendQuickChip(txt) {
-      document.getElementById("customerMessageInput").value = txt;
-      sendCustomerMessage();
-    }
-
-    async function sendCustomerMessage() {
-      const input = document.getElementById("customerMessageInput");
-      const txt = input.value.trim();
-      if (!txt) return;
-
-      appendMessage('customer', txt);
-      input.value = "";
-
-      document.getElementById("customerTypingIndicator").classList.remove("hidden");
-
-      setTimeout(() => {
-        document.getElementById("customerTypingIndicator").classList.add("hidden");
-        processAiResponse(txt);
-      }, 700);
-    }
-
-    function processAiResponse(userText) {
-      const lower = userText.toLowerCase();
-
-      if (chatState === 'normal') {
-        if (lower.includes("deliver") || lower.includes("yes") || lower.includes("order")) {
-          chatState = 'collecting_delivery_form';
-          appendMessage('ai', `Great! Please provide your delivery details in this format:\n\n1. Full Address:\n2. Contact Number:\n3. Preferred Item/Bundle:\n\n(Type your details below)`);
-        } else {
-          appendMessage('ai', `Thank you for asking! We offer organic herbal coffee, supplements, and wellness items with Buy 4 Free Shipping. Would you like to deliver now?`);
-        }
-      } else if (chatState === 'collecting_delivery_form') {
-        chatState = 'awaiting_proceed_confirmation';
-        appendMessage('ai', `📋 **Review Your Delivery Details:**\n${userText}\n\nWould you like to **Proceed Now** with this delivery? (Reply 'Yes' or click Proceed Now)`);
-      } else if (chatState === 'awaiting_proceed_confirmation') {
-        if (lower.includes("yes") || lower.includes("proceed") || lower.includes("confirm")) {
-          chatState = 'normal';
-          const refNo = "AMN-" + Math.floor(100000 + Math.random() * 900000);
-          appendMessage('ai', `🎉 **Order Confirmed & Dispatched!**\n\nReference No: **${refNo}**\nPayment: Cash On Delivery (COD)\n\n🙏 **Thank you so much, ${customerSession.name}, for choosing Amanah Health & Wellness!** Your organic wellness products will be delivered right to your doorstep with free shipping. Have a blessed and healthy day! ✨`);
-          
-          currentOrders.unshift({
-            ref: refNo,
-            name: customerSession.name,
-            phone: '0917-AI-CHAT',
-            address: 'Via AI Instant Messenger',
-            packageTitle: 'Special Promo Bundle',
-            total: 1700,
-            status: 'Pending COD',
-            date: 'Just Now'
+      // Broadcast / Persist to Supabase DB if available
+      if (window.supabaseClient) {
+        window.supabaseClient
+          .from('chat_messages')
+          .insert({
+            id: msgId,
+            conversation_id: customerSession.id,
+            sender_id: senderType === 'customer' ? customerSession.name : senderType,
+            sender_type: senderType,
+            message: text
+          })
+          .then(({ error }) => {
+            if (error) console.warn('Supabase insert warning (offline fallback active):', error.message);
           });
-          renderAdminOrders();
-        } else {
-          chatState = 'normal';
-          appendMessage('ai', `No problem! Let me know if you need any other information about our products.`);
-        }
-      } else {
-        appendMessage('ai', `Thank you for messaging Amanah! How else can we assist you today?`);
       }
     }
 
