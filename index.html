@@ -909,9 +909,15 @@
             return;
         }
 
+        // Initialize Supabase Client with disabled realtime websockets to avoid Canvas SecurityError
         window.supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
-            SUPABASE_PUBLISHABLE_KEY
+            SUPABASE_PUBLISHABLE_KEY,
+            {
+              realtime: {
+                autoConnect: false // Prevents automatic WebSocket connection attempts in sandboxed Canvas iframe
+              }
+            }
         );
 
         console.log("Supabase connected successfully!");
@@ -1254,11 +1260,20 @@
     // SUPABASE REALTIME CHANNEL SUBSCRIPTION
     function subscribeToRealtimeMessages(conversationId) {
       if (realtimeChannel) {
-        window.supabaseClient?.removeChannel(realtimeChannel);
+        try {
+          window.supabaseClient?.removeChannel(realtimeChannel);
+        } catch (e) {}
       }
 
-      if (window.supabaseClient && window.supabaseClient.channel) {
+      // Safely attempt channel connection; gracefully fall back if Canvas restricts WebSocket creation
+      if (window.supabaseClient && typeof window.supabaseClient.channel === 'function') {
         try {
+          // Check if WebSocket is available/allowed in current environment
+          if (typeof WebSocket === 'undefined') {
+            console.warn('WebSockets unavailable. Falling back to instant local messaging.');
+            return;
+          }
+
           realtimeChannel = window.supabaseClient
             .channel(`chat-messages-live-${conversationId}`)
             .on(
@@ -1270,10 +1285,8 @@
                 filter: `conversation_id=eq.${conversationId}`
               },
               (payload) => {
-                console.log('New message:', payload.new);
                 const newMsg = payload.new;
 
-                // Prevent duplicate insertion if already added locally
                 if (!DB.messages.some(m => m.id === newMsg.id)) {
                   DB.messages.push({
                     id: newMsg.id || 'msg_' + Date.now(),
@@ -1286,107 +1299,152 @@
                   renderAdminMessages();
                 }
               }
-            )
-            .subscribe((status) => {
+            );
+
+          // Attempt subscription with try-catch block for canvas security guardrails
+          realtimeChannel.subscribe((status, err) => {
+            if (err || status === 'CHANNEL_ERROR') {
+              console.warn('Realtime channel fallback active (Canvas WebSocket restricted). Instant messaging operating locally.');
+            } else {
               console.log('Realtime subscription status:', status);
-            });
+            }
+          });
         } catch (err) {
-          console.warn('Realtime channel fallback mode active:', err);
+          console.warn('Realtime channel fallback mode active:', err.message);
         }
       }
     }
 
     function toggleCustomerChatWidget() {
-      document.getElementById("customerChatWindow").classList.toggle("hidden");
+      const win = document.getElementById('customerChatWindow');
+      win.classList.toggle('hidden');
+      if (!win.classList.contains('hidden')) {
+        renderCustomerView();
+      }
+    }
+
+    function openCustomerChatWidget() {
+      document.getElementById('customerChatWindow').classList.remove('hidden');
+      renderCustomerView();
     }
 
     function closeCustomerChatWidget() {
-      document.getElementById("customerChatWindow").classList.add("hidden");
+      document.getElementById('customerChatWindow').classList.add('hidden');
+    }
+
+    function renderCustomerView() {
+      if (customerSession.name) {
+        document.getElementById('customerAuthScreen').classList.add('hidden');
+        document.getElementById('customerActiveScreen').classList.remove('hidden');
+        renderCustomerMessages();
+      } else {
+        document.getElementById('customerAuthScreen').classList.remove('hidden');
+        document.getElementById('customerActiveScreen').classList.add('hidden');
+      }
     }
 
     function initCustomerSession() {
-      const nameInput = document.getElementById("custInputName").value.trim();
-      if (!nameInput) {
-        alert("Please enter your name.");
+      const name = document.getElementById('custInputName').value.trim();
+      if (!name) {
+        alert('Please enter your name.');
         return;
       }
 
-      customerSession.name = nameInput;
+      customerSession.name = name;
       customerSession.id = 'conv_' + Date.now();
-
-      DB.conversations.unshift({ id: customerSession.id, customer_name: nameInput, status: 'active', last_message: 'Session started' });
       activeAdminConvId = customerSession.id;
 
-      // Subscribe to Supabase Realtime channel for this conversation
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      DB.conversations.unshift({ id: customerSession.id, customer_name: name, status: 'active', last_message: 'Started conversation' });
+
+      DB.messages.push({
+        id: 'msg_welcome_' + Date.now(),
+        conversation_id: customerSession.id,
+        sender_type: 'ai',
+        message: `Hello ${name}! Welcome to Amanah Health & Wellness AI Support. Would you like to proceed with your order delivery now?`,
+        time: timeStr
+      });
+
       subscribeToRealtimeMessages(customerSession.id);
-
-      document.getElementById("customerAuthScreen").classList.add("hidden");
-      document.getElementById("customerActiveScreen").classList.remove("hidden");
-
-      appendMessage('ai', `Hello ${nameInput}! Welcome to Amanah. Would you like to deliver now? (Type Yes or click 'Deliver Now')`);
-      renderAdminMessages();
+      renderCustomerView();
+      renderAdminConversations();
     }
 
-    function appendMessage(senderType, text) {
-      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const msgId = 'msg_' + Date.now();
-      const msgObj = {
-        id: msgId,
-        conversation_id: customerSession.id,
-        sender_type: senderType,
-        message: text,
-        time: timeStr
-      };
+    function renderCustomerMessages() {
+      const stream = document.getElementById('customerMessagesStream');
+      if (!stream) return;
+      stream.innerHTML = '';
 
-      DB.messages.push(msgObj);
-      renderCustomerMessages();
-      renderAdminMessages();
-
-      // Broadcast / Persist to Supabase DB if available
-      if (window.supabaseClient) {
-        window.supabaseClient
-          .from('chat_messages')
-          .insert({
-            id: msgId,
-            conversation_id: customerSession.id,
-            sender_id: senderType === 'customer' ? customerSession.name : senderType,
-            sender_type: senderType,
-            message: text
-          })
-          .then(({ error }) => {
-            if (error) console.warn('Supabase insert warning (offline fallback active):', error.message);
-          });
-      }
+      const msgs = DB.messages.filter(m => m.conversation_id === customerSession.id);
+      msgs.forEach(m => {
+        const isUser = m.sender_type === 'customer';
+        const isAi = m.sender_type === 'ai';
+        const bubbleClass = isUser ? 'chat-bubble-user text-white self-end' : (isAi ? 'chat-bubble-ai text-emerald-950' : 'chat-bubble-agent text-slate-800');
+        
+        const div = document.createElement('div');
+        div.className = `flex flex-col ${isUser ? 'items-end' : 'items-start'}`;
+        div.innerHTML = `
+          <div class="max-w-[85%] rounded-xl p-2.5 text-xs space-y-1 shadow-sm ${bubbleClass}">
+            <div class="flex items-center justify-between space-x-3 opacity-75 text-[10px] font-semibold border-b border-black/5 pb-1">
+              <span>${isUser ? 'You' : (isAi ? 'Amanah AI' : 'Support Agent')}</span>
+              <span>${m.time}</span>
+            </div>
+            <div class="whitespace-pre-wrap leading-relaxed">${m.message}</div>
+          </div>
+        `;
+        stream.appendChild(div);
+      });
+      stream.scrollTop = stream.scrollHeight;
     }
 
     function renderAdminMessages() {
-      const list = document.getElementById("conversationList");
-      const stream = document.getElementById("adminMessagesStream");
+      const stream = document.getElementById('adminMessagesStream');
+      if (!stream) return;
+      stream.innerHTML = '';
 
-      list.innerHTML = DB.conversations.map(c => `
-        <div onclick="activeAdminConvId='${c.id}'; renderAdminMessages();" class="p-3 cursor-pointer hover:bg-emerald-50 ${c.id === activeAdminConvId ? 'bg-emerald-100/60 border-l-4 border-emerald-600' : ''}">
-          <h4 class="text-xs font-bold text-gray-800">${c.customer_name}</h4>
-          <p class="text-[11px] text-gray-500 truncate">${c.last_message}</p>
-        </div>
-      `).join("");
+      const msgs = DB.messages.filter(m => m.conversation_id === activeAdminConvId);
+      msgs.forEach(m => {
+        const isUser = m.sender_type === 'customer';
+        const isAi = m.sender_type === 'ai';
+        const bubbleClass = isUser ? 'chat-bubble-user text-white self-start' : (isAi ? 'chat-bubble-ai text-emerald-950' : 'chat-bubble-agent text-slate-800 self-end');
 
-      stream.innerHTML = DB.messages.filter(m => m.conversation_id === activeAdminConvId).map(m => `
-        <div class="flex ${m.sender_type === 'admin' ? 'justify-end' : 'justify-start'}">
-          <div class="max-w-[80%] rounded-xl p-2.5 text-xs ${m.sender_type === 'admin' ? 'bg-emerald-600 text-white' : 'bg-white border text-gray-800'}">
-            <span class="block text-[10px] opacity-75 font-bold">${m.sender_type}</span>
-            <p class="whitespace-pre-wrap">${m.message}</p>
+        const div = document.createElement('div');
+        div.className = `flex flex-col ${isUser ? 'items-start' : 'items-end'}`;
+        div.innerHTML = `
+          <div class="max-w-[85%] rounded-xl p-2.5 text-xs space-y-1 shadow-sm ${bubbleClass}">
+            <div class="flex items-center justify-between space-x-3 opacity-75 text-[10px] font-semibold border-b border-black/5 pb-1">
+              <span>${isUser ? 'Customer' : (isAi ? 'Amanah AI' : 'Agent')}</span>
+              <span>${m.time}</span>
+            </div>
+            <div class="whitespace-pre-wrap leading-relaxed">${m.message}</div>
           </div>
-        </div>
-      `).join("");
+        `;
+        stream.appendChild(div);
+      });
+      stream.scrollTop = stream.scrollHeight;
     }
 
-    function sendAdminReply() {
-      const input = document.getElementById("adminMessageInput");
-      const txt = input.value.trim();
-      if (!txt) return;
+    function renderAdminConversations() {
+      const list = document.getElementById('conversationList');
+      if (!list) return;
+      list.innerHTML = DB.conversations.map(c => `
+        <div onclick="selectAdminConversation('${c.id}')" class="p-3 cursor-pointer hover:bg-slate-100 ${c.id === activeAdminConvId ? 'bg-emerald-50 border-l-4 border-emerald-600' : ''}">
+          <h5 class="font-bold text-xs text-slate-800">${c.customer_name}</h5>
+          <p class="text-[11px] text-slate-500 truncate">${c.last_message}</p>
+        </div>
+      `).join('');
+    }
 
-      appendMessage('admin', txt);
-      input.value = "";
+    function selectAdminConversation(convId) {
+      activeAdminConvId = convId;
+      subscribeToRealtimeMessages(convId);
+      renderAdminConversations();
+      renderAdminMessages();
+    }
+
+    function sendQuickChip(chipText) {
+      document.getElementById('customerMessageInput').value = chipText;
+      sendCustomerMessage();
     }
 
     function handleKeyPress(e, mode) {
@@ -1394,6 +1452,83 @@
         if (mode === 'customer') sendCustomerMessage();
         if (mode === 'admin') sendAdminReply();
       }
+    }
+
+    function sendCustomerMessage() {
+      const input = document.getElementById('customerMessageInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const newMsg = { id: 'msg_' + Date.now(), conversation_id: customerSession.id, sender_type: 'customer', message: text, time: timeStr };
+
+      DB.messages.push(newMsg);
+      input.value = '';
+      renderCustomerMessages();
+      renderAdminMessages();
+
+      // Broadcast to Supabase database if connected
+      if (window.supabaseClient) {
+        window.supabaseClient.from('chat_messages').insert([{
+          conversation_id: customerSession.id,
+          sender_id: customerSession.name,
+          sender_type: 'customer',
+          message: text
+        }]).then(() => {}).catch(() => {});
+      }
+
+      // Process AI response logic with delivery prompt workflow
+      processAiResponse(text);
+    }
+
+    function sendAdminReply() {
+      const input = document.getElementById('adminMessageInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const newMsg = { id: 'msg_' + Date.now(), conversation_id: activeAdminConvId, sender_type: 'admin', message: text, time: timeStr };
+
+      DB.messages.push(newMsg);
+      input.value = '';
+      renderCustomerMessages();
+      renderAdminMessages();
+    }
+
+    function processAiResponse(userText) {
+      const lower = userText.toLowerCase();
+      const indicator = document.getElementById('customerTypingIndicator');
+      if (indicator) indicator.classList.remove('hidden');
+
+      setTimeout(() => {
+        if (indicator) indicator.classList.add('hidden');
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        let replyMsg = '';
+
+        if (chatState === 'collecting_delivery_form') {
+          chatState = 'awaiting_proceed_confirmation';
+          replyMsg = `Thank you! We have logged your delivery details. Would you like to **Proceed Now** with dispatching your order?`;
+        } else if (chatState === 'awaiting_proceed_confirmation' && (lower.includes('yes') || lower.includes('proceed') || lower.includes('ok'))) {
+          chatState = 'normal';
+          replyMsg = `🎉 **Thank You!** Your delivery request has been confirmed and placed in our priority queue. Our dispatch team will contact you shortly for fulfillment.`;
+        } else if (lower.includes('deliver now') || lower.includes('deliver') || lower.includes('yes')) {
+          chatState = 'collecting_delivery_form';
+          replyMsg = `Great! Please type your **Full Name, Complete Address, Mobile Number, & Preferred Product/Bundle** below to complete your delivery details:`;
+        } else {
+          replyMsg = `Thank you for your message! Would you like us to deliver your Amanah Wellness products now?`;
+        }
+
+        DB.messages.push({
+          id: 'msg_ai_' + Date.now(),
+          conversation_id: customerSession.id,
+          sender_type: 'ai',
+          message: replyMsg,
+          time: timeStr
+        });
+
+        renderCustomerMessages();
+        renderAdminMessages();
+      }, 800);
     }
   </script>
 </body>
