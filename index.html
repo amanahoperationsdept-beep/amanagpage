@@ -902,6 +902,7 @@
     try {
       if (window.WebSocket && !window.location.hostname.includes('sandbox')) {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+        window.supabaseClient = supabaseClient;
       }
     } catch(e) { console.warn("Standalone simulation mode active."); }
 
