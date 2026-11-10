@@ -15,7 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <!-- Supabase JS SDK & Agent Skills Integration -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+  <script src="supabase.js"></script>
   <script src="script.js"></script>
   <!-- 
     Supabase Agent Skills Integration:
@@ -894,13 +894,28 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    /
-    try {
-      if (window.WebSocket && !window.location.hostname.includes('sandbox')) {
-        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-        window.supabaseClient = supabaseClient;
-      }
-    } catch(e) { console.warn("Standalone simulation mode active."); }
+    // SUPABASE CONFIGURATION & SHARED CLIENT INITIALIZATION
+    (() => {
+        const SUPABASE_URL = "https://bmtikgyesxutrrupudph.supabase.co/rest/v1/";
+        const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IDm_YKqPXQjIMXu-k5eqWA_LXMpdTvV";
+
+        if (!window.supabase || !window.supabase.createClient) {
+            console.error("Supabase library not loaded!");
+            return;
+        }
+
+        if (window.supabaseClient) {
+            console.log("Supabase client already initialized.");
+            return;
+        }
+
+        window.supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+        console.log("Supabase connected successfully!");
+    })();
 
     let isAdminAuthenticated = false;
     const ADMIN_PASSWORD = "amanah2026";
@@ -1388,13 +1403,5 @@
       }
     }
   </script>
-  <!-- Supabase library -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- Supabase connection -->
-<script src="./supabase.js"></script>
-
-<!-- Main website JavaScript -->
-<script src="./script.js"></script>
 </body>
 </html>
