@@ -893,17 +893,21 @@
     let currentVisitorId = null;
     let ordersChannel = null;
     let conversationsChannel = null;
+    // Read any existing session without forcing anonymous sign-in at page load.
+    // Admins must be able to sign in even when customer anonymous sign-in is disabled.
     const supabaseReady = (async () => {
       if (!window.supabaseClient) throw new Error("Supabase client unavailable");
-      const { data: { session } } = await window.supabaseClient.auth.getSession();
-      if (session?.user) { currentVisitorId = session.user.id; return session.user; }
-      const { data, error } = await window.supabaseClient.auth.signInAnonymously();
+      const { data: { session }, error } = await window.supabaseClient.auth.getSession();
       if (error) throw error;
-      currentVisitorId = data.user.id;
-      return data.user;
-    })();
+      if (session?.user) currentVisitorId = session.user.id;
+      return session?.user || null;
+    })().catch((err) => {
+      console.warn("Supabase session initialization warning:", err);
+      return null;
+    });
 
     async function requireVisitor() {
+      await supabaseReady;
       const { data: { user: existing } } = await window.supabaseClient.auth.getUser();
       if (existing) { currentVisitorId = existing.id; return existing; }
       const { data, error } = await window.supabaseClient.auth.signInAnonymously();
@@ -930,7 +934,7 @@
       const errorEl = document.getElementById('adminAuthError');
       errorEl.classList.add('hidden');
       try {
-        await supabaseReady;
+        if (!window.supabaseClient) throw new Error("Supabase is not initialized. Please refresh the page and try again.");
         const email = document.getElementById('adminEmailInput').value.trim();
         const password = document.getElementById('adminPasswordInput').value;
         const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
