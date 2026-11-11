@@ -159,6 +159,7 @@ async function handleCallback(request: Request) {
     });
     const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
     if (!pages.length) throw new Error("No Facebook Pages were returned. Confirm this Facebook account has Page access and approve the requested permissions.");
+    let savedPages = 0;
     for (const page of pages) {
       if (!page.id || !page.access_token) continue;
       const encrypted = await encryptToken(page.access_token);
@@ -171,7 +172,9 @@ async function handleCallback(request: Request) {
         updated_at: new Date().toISOString(),
       }, { onConflict: "page_id" });
       if (saveError) throw new Error("Could not securely save a Page connection: " + saveError.message);
+      savedPages += 1;
     }
+    if (savedPages === 0) throw new Error("Meta did not return a Page access token. Check that the connecting account has permission to create content on the selected Page.");
     return callbackPage(true);
   } catch (error) {
     console.error("Meta OAuth callback failed:", error);
@@ -216,7 +219,7 @@ Deno.serve(async (request: Request) => {
 
     if (action === "status") {
       const { data, error } = await db.from("facebook_page_connections")
-        .select("page_id,page_name,updated_at").eq("connected_by", user.id).order("page_name");
+        .select("page_id,page_name,updated_at").order("page_name");
       if (error) throw error;
       return json({ pages: data || [] });
     }
@@ -225,7 +228,7 @@ Deno.serve(async (request: Request) => {
       const pageId = String(body.page_id || "");
       if (!pageId) return json({ error: "Select a Facebook Page to disconnect." }, 400);
       const { error } = await db.from("facebook_page_connections").delete()
-        .eq("page_id", pageId).eq("connected_by", user.id);
+        .eq("page_id", pageId);
       if (error) throw error;
       return json({ success: true });
     }
@@ -241,7 +244,7 @@ Deno.serve(async (request: Request) => {
       if (parsedLink.protocol !== "https:") return json({ error: "Only HTTPS links can be published." }, 400);
       const { data: page, error: pageError } = await db.from("facebook_page_connections")
         .select("page_id,page_name,token_ciphertext,token_iv")
-        .eq("page_id", pageId).eq("connected_by", user.id).maybeSingle();
+        .eq("page_id", pageId).maybeSingle();
       if (pageError || !page) return json({ error: "That Facebook Page is not connected to your administrator account." }, 404);
       const pageToken = await decryptToken(page.token_ciphertext, page.token_iv);
       const proof = await appSecretProof(pageToken);
