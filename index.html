@@ -1173,7 +1173,8 @@
 
     window.onload = function() {
       renderThumbnails();
-      selectProduct("barakah");
+      const requestedProduct = new URLSearchParams(window.location.search).get("product");
+      selectProduct(productCatalog[requestedProduct] ? requestedProduct : "barakah");
       renderReviews();
       renderFaqs();
       startCountdownTimer();
