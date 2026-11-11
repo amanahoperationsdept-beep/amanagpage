@@ -30,7 +30,7 @@ jobs:
         with:
           deno-version: v2.x
       - name: Type-check Facebook Marketing Edge Function
-        run: deno check --node-modules-dir=auto supabase/functions/facebook-marketing/index.ts
+        run: deno check supabase/functions/facebook-marketing/index.ts
       - name: Check inline browser JavaScript syntax
         run: node -e 'const fs=require("fs");const html=fs.readFileSync("index.html","utf8");const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(match=>match[1]).filter(source=>source.trim());scripts.forEach(source=>new Function(source));console.log("Checked "+scripts.length+" inline script block(s)");'
       - name: Install build dependencies
