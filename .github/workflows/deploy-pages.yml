@@ -25,6 +25,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Set up Deno for Edge Function type-check
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check Facebook Marketing Edge Function
+        run: deno check supabase/functions/facebook-marketing/index.ts
+      - name: Check inline browser JavaScript syntax
+        run: node -e 'const fs=require("fs");const html=fs.readFileSync("index.html","utf8");const scripts=[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map(match=>match[1]).filter(source=>source.trim());scripts.forEach(source=>new Function(source));console.log("Checked "+scripts.length+" inline script block(s)");'
       - name: Install build dependencies
         run: npm install
       - name: Compile production Tailwind CSS
