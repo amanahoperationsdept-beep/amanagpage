@@ -939,6 +939,10 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
+    // Public Supabase project configuration used by the secure Facebook function caller.
+    const AMANAH_SUPABASE_URL = "https://bmtikgyesxutrrupudph.supabase.co";
+    const AMANAH_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_IDm_YKqPXQjIMXu-k5eqWA_LXMpdTvV";
+
     // SUPABASE CONFIGURATION & SHARED CLIENT INITIALIZATION
     (() => {
         // Correct base Supabase URL (removed /rest/v1/ which broke WebSocket connections)
@@ -1320,7 +1324,7 @@
     }
 
     // FACEBOOK MARKETING — all Meta credentials and Page tokens remain server-side.
-    const FACEBOOK_FUNCTION_URL = SUPABASE_URL + '/functions/v1/facebook-marketing';
+    const FACEBOOK_FUNCTION_URL = AMANAH_SUPABASE_URL + '/functions/v1/facebook-marketing';
     const FACEBOOK_SITE_ORIGIN = 'https://amanahoperationsdept-beep.github.io';
 
     function showFacebookStatus(message, success) {
@@ -1343,7 +1347,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': SUPABASE_PUBLISHABLE_KEY,
+          'apikey': AMANAH_SUPABASE_PUBLISHABLE_KEY,
           'Authorization': 'Bearer ' + accessToken
         },
         body: JSON.stringify(Object.assign({ action: action }, payload || {}))
@@ -1434,7 +1438,7 @@
     }
 
     window.addEventListener('message', event => {
-      if (event.origin !== new URL(SUPABASE_URL).origin) return;
+      if (event.origin !== new URL(AMANAH_SUPABASE_URL).origin) return;
       if (!event.data || event.data.type !== 'AMANAH_FACEBOOK_OAUTH') return;
       if (event.data.ok) {
         loadFacebookMarketingStatus()
