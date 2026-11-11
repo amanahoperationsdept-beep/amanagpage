@@ -4,9 +4,7 @@ This feature adds a Facebook Marketing tab to the existing Supabase-authenticate
 
 ## 1. Apply the database migration
 
-In the Supabase project used by this store, open SQL Editor and run:
-
-supabase/migrations/202611110001_facebook_marketing.sql
+In the Supabase project used by this store, open SQL Editor, paste the complete contents of `supabase/migrations/202611110001_facebook_marketing.sql` into one query tab, and click **Run** once. The migration is wrapped in one PostgreSQL `DO` statement for SQL runners that accept only a singular query.
 
 The migration creates the OAuth-state and encrypted Page-connection tables. It does not change existing order, chat, or customer tables.
 
