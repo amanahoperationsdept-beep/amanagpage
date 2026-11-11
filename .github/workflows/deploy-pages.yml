@@ -1,4 +1,5 @@
 name: Build and deploy Amanah landing page
+# Re-deploy after enabling GitHub Pages with GitHub Actions as the source.
 
 on:
   push:
