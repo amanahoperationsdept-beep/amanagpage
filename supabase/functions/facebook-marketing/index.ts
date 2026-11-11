@@ -103,9 +103,10 @@ async function graphGet(path: string, params: Record<string, string>) {
 function callbackPage(ok: boolean, error?: string) {
   const payload = JSON.stringify({ type: "AMANAH_FACEBOOK_OAUTH", ok, error: error || "" }).replace(/</g, "\\u003c");
   const target = JSON.stringify(SITE_ORIGIN);
+  const safeError = String(error || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const page = "<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Amanah Facebook Connection</title></head><body style='font-family:system-ui,sans-serif;padding:32px;text-align:center;color:#064e3b'><h2>" +
     (ok ? "Facebook Page connected" : "Facebook connection failed") +
-    "</h2><p>" + (ok ? "You can close this window and return to Amanah Admin Portal." : "Return to Amanah Admin Portal and try again. " + (error || "")) +
+    "</h2><p>" + (ok ? "You can close this window and return to Amanah Admin Portal." : "Return to Amanah Admin Portal and try again. " + safeError) +
     "</p><script>if(window.opener){window.opener.postMessage(" + payload + "," + target + ");}setTimeout(function(){window.close();},900);</script></body></html>";
   return new Response(page, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 }
