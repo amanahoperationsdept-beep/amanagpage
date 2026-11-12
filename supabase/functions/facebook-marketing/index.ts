@@ -481,12 +481,13 @@ Deno.serve(async (request: Request) => {
             attachedMedia.push(String(photoResult.id));
           }
 
+          const photoCaption = message + (link ? "\n\n" + link : "");
+          if (photoCaption.length > 5000) throw new Error("The caption and website link together exceed 5,000 characters.");
           const postForm = new FormData();
-          postForm.set("message", message);
+          postForm.set("message", photoCaption);
           attachedMedia.forEach((mediaId, index) => {
             postForm.set("attached_media[" + index + "]", JSON.stringify({ media_fbid: mediaId }));
           });
-          if (link) postForm.set("link", link);
           postForm.set("published", "true");
           postForm.set("access_token", pageToken);
           postForm.set("appsecret_proof", proof);
