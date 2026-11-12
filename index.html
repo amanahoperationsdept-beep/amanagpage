@@ -1504,8 +1504,10 @@
       if (error) throw error;
       currentOrders = (data || []).map(o => ({
         id:o.id, ref:o.ref, name:o.customer_name, phone:o.phone, address:o.address,
-        packageTitle:o.package_title, total:Number(o.total), status:o.status,
-        paymentMethod:o.payment_method || "COD", date:o.created_at
+        packageTitle:o.package_title, quantity:Number(o.quantity || 0), subtotal:Number(o.subtotal || 0),
+        shipping:Number(o.shipping || 0), total:Number(o.total), status:o.status,
+        paymentMethod:o.payment_method || "COD", deliveryNotes:o.delivery_notes || "",
+        confirmPhone:o.confirm_phone || "", date:o.created_at
       }));
       filterAdminOrders();
     }
@@ -1576,12 +1578,12 @@
       ];
       const csvCell = value => {
         let text = String(value ?? "");
-        if (/^[\\s]*[=+\\-@]/.test(text)) text = "'" + text;
+        if (/^\s*[=+\-@]/.test(text)) text = "'" + text;
         return '"' + text.replace(/"/g, '""') + '"';
       };
       const rows = [columns.map(([label]) => csvCell(label)).join(",")];
       currentOrders.forEach(order => rows.push(columns.map(([, key]) => csvCell(order[key])).join(",")));
-      const blob = new Blob(["\\uFEFF" + rows.join("\\r\\n")], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob(["\uFEFF" + rows.join("\r\n")], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
