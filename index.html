@@ -763,6 +763,7 @@
                     <th class="p-3">Address</th>
                     <th class="p-3">Package</th>
                     <th class="p-3">Total</th>
+                    <th class="p-3">Payment</th>
                     <th class="p-3">Status</th>
                     <th class="p-3">Actions</th>
                   </tr>
@@ -1249,26 +1250,56 @@
     async function handleOrderSubmit(e) {
       e.preventDefault();
       const prod = productCatalog[currentProductId];
-      const bundle = prod.bundles[selectedPackageQty];
-      const totalAmt = bundle.price + bundle.shipping;
+      const bundle = prod?.bundles?.[selectedPackageQty];
+      if (!prod || !bundle) {
+        alert("Please select a valid product package before placing your order.");
+        return;
+      }
+      const totalAmt = Number(bundle.price) + Number(bundle.shipping);
       const refNo = "AMN-" + Date.now().toString().slice(-8);
       const custName = document.getElementById("fullName").value.trim();
       const phone = document.getElementById("mobileNumber").value.trim();
-      const address = document.getElementById("streetAddress").value.trim();
+      const confirmPhone = document.getElementById("confirmMobile").value.trim();
+      if (phone !== confirmPhone) {
+        alert("The mobile numbers do not match. Please check both fields.");
+        document.getElementById("confirmMobile").focus();
+        return;
+      }
+      const address = [
+        document.getElementById("streetAddress").value.trim(),
+        document.getElementById("barangay").value.trim(),
+        document.getElementById("city").value.trim(),
+        document.getElementById("province").value.trim(),
+        document.getElementById("zipCode").value.trim()
+      ].filter(Boolean).join(", ");
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || "COD";
+      const deliveryNotes = document.getElementById("notes").value.trim();
+      const status = paymentMethod === "COD" ? "Pending COD" : "Pending Payment";
       try {
         const user = await requireVisitor();
         const { error } = await window.supabaseClient.from('amanah_orders').insert({
-          ref: refNo, visitor_id: user.id, customer_name: custName, phone, address,
-          package_title: `${bundle.title} - ${prod.name}`, product_id: currentProductId,
-          quantity: bundle.qty, subtotal: bundle.price, shipping: bundle.shipping,
-          total: totalAmt, status: 'Pending COD'
+          ref: refNo,
+          visitor_id: user.id,
+          customer_name: custName,
+          phone,
+          confirm_phone: confirmPhone,
+          address,
+          package_title: `${bundle.title} - ${prod.name}`,
+          product_id: currentProductId,
+          quantity: bundle.qty,
+          subtotal: bundle.price,
+          shipping: bundle.shipping,
+          total: totalAmt,
+          payment_method: paymentMethod,
+          delivery_notes: deliveryNotes,
+          status
         });
         if (error) throw error;
         document.getElementById("modal-ref-no").textContent = refNo;
         document.getElementById("modal-cust-name").textContent = custName;
         document.getElementById("modal-cust-address").textContent = address;
         document.getElementById("modal-cust-pkg").textContent = `${bundle.title} (${prod.name})`;
-        document.getElementById("modal-cust-total").textContent = "₱" + totalAmt;
+        document.getElementById("modal-cust-total").textContent = "₱" + totalAmt.toLocaleString();
         document.getElementById("successModal").classList.remove("hidden");
         if (window.confetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       } catch (err) {
@@ -1282,9 +1313,9 @@
     function renderReviews() {
       document.getElementById("reviews-container").innerHTML = currentReviews.map(r => `
         <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-2">
-          <div class="text-amber-400 text-xs">${'<i class="fa-solid fa-star"></i>'.repeat(r.stars)}</div>
-          <p class="text-xs text-gray-600 font-medium">"${r.text}"</p>
-          <span class="font-bold text-xs text-gray-800 block pt-2">${r.name} (${r.loc})</span>
+          <div class="text-amber-400 text-xs">${'<i class="fa-solid fa-star"></i>'.repeat(Math.max(1, Math.min(5, Number(r.stars) || 5)))}</div>
+          <p class="text-xs text-gray-600 font-medium">"${escapeHtml(r.text)}"</p>
+          <span class="font-bold text-xs text-gray-800 block pt-2">${escapeHtml(r.name)} (${escapeHtml(r.loc)})</span>
         </div>
       `).join("");
     }
@@ -1449,26 +1480,34 @@
       }
     });
 
-    function renderAdminOrders() {
+    function renderAdminOrders(orders = currentOrders) {
+      const tbody = document.getElementById("admin-orders-tbody");
+      if (!tbody) return;
       document.getElementById("admin-orders-count").textContent = currentOrders.length;
       document.getElementById("stat-total-orders").textContent = currentOrders.length;
       document.getElementById("stat-pending-orders").textContent = currentOrders.filter(o => String(o.status).includes("Pending")).length;
       document.getElementById("stat-total-revenue").textContent = "₱" + currentOrders.reduce((acc, o) => acc + Number(o.total || 0), 0).toLocaleString();
-      document.getElementById("admin-orders-tbody").innerHTML = currentOrders.map(o => `
+      tbody.innerHTML = orders.map(o => `
         <tr class="hover:bg-gray-50 border-b">
-          <td class="p-3 font-mono font-bold text-emerald-800">${o.ref}</td>
-          <td class="p-3 font-bold">${o.name}<br/><span class="text-[10px] text-gray-400">${o.phone}</span></td>
-          <td class="p-3">${o.address}</td><td class="p-3">${o.packageTitle}</td>
-          <td class="p-3 font-black text-emerald-700">₱${o.total}</td>
-          <td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-bold">${o.status}</span></td>
-          <td class="p-3"><button onclick="updateOrderStatus('${o.id}','Dispatched')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[10px]">Dispatch</button></td>
+          <td class="p-3 font-mono font-bold text-emerald-800">${escapeHtml(o.ref)}</td>
+          <td class="p-3 font-bold">${escapeHtml(o.name)}<br/><span class="text-[10px] text-gray-400">${escapeHtml(o.phone)}</span></td>
+          <td class="p-3">${escapeHtml(o.address)}</td>
+          <td class="p-3">${escapeHtml(o.packageTitle)}</td>
+          <td class="p-3 font-black text-emerald-700">₱${Number(o.total || 0).toLocaleString()}</td>
+          <td class="p-3">${escapeHtml(o.paymentMethod || "COD")}</td>
+          <td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-bold">${escapeHtml(o.status)}</span></td>
+          <td class="p-3"><button onclick="updateOrderStatus('${escapeHtml(o.id)}','Dispatched')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[10px]">Dispatch</button></td>
         </tr>`).join("");
     }
     async function loadAdminOrders() {
       const { data, error } = await window.supabaseClient.from('amanah_orders').select('*').order('created_at', { ascending: false });
       if (error) throw error;
-      currentOrders = (data || []).map(o => ({id:o.id,ref:o.ref,name:o.customer_name,phone:o.phone,address:o.address,packageTitle:o.package_title,total:Number(o.total),status:o.status,date:o.created_at}));
-      renderAdminOrders();
+      currentOrders = (data || []).map(o => ({
+        id:o.id, ref:o.ref, name:o.customer_name, phone:o.phone, address:o.address,
+        packageTitle:o.package_title, total:Number(o.total), status:o.status,
+        paymentMethod:o.payment_method || "COD", date:o.created_at
+      }));
+      filterAdminOrders();
     }
     async function updateOrderStatus(id,status) {
       const {error}=await window.supabaseClient.from('amanah_orders').update({status}).eq('id',id);
@@ -1481,12 +1520,85 @@
         return `<div class="p-3 bg-gray-50 rounded-xl border flex items-center justify-between text-xs"><span class="font-bold">${prod.name}</span><span class="font-bold text-emerald-700">₱${prod.srp}</span></div>`;
       }).join("");
     }
-    function renderAdminReviews() {}
-    function renderAdminFaqs() {}
-    function saveHeroSettings() { alert("Banner updated!"); }
-    function saveAdminPricing() { alert("Pricing saved!"); }
-    function exportToCSV() { alert("Exported CSV!"); }
-    function filterAdminOrders() {}
+    function renderAdminReviews() {
+      const list = document.getElementById("admin-reviews-list");
+      if (!list) return;
+      list.innerHTML = currentReviews.map((review, index) => `
+        <div class="p-3 rounded-xl border bg-white text-xs">
+          <div class="font-bold">${escapeHtml(review.name)} — ${escapeHtml(review.loc)}</div>
+          <div class="text-amber-500 my-1">${"★".repeat(Math.max(1, Math.min(5, Number(review.stars) || 5)))}</div>
+          <p class="text-gray-600">${escapeHtml(review.text)}</p>
+          <button type="button" onclick="removeAdminReview(${index})" class="mt-2 text-red-700 font-bold">Remove</button>
+        </div>`).join("");
+    }
+    function addNewReviewAdmin(event) {
+      event.preventDefault();
+      const name = document.getElementById("new-rev-name").value.trim();
+      const loc = document.getElementById("new-rev-loc").value.trim();
+      const text = document.getElementById("new-rev-text").value.trim();
+      if (!name || !loc || !text) return;
+      currentReviews.unshift({ name, loc, text, stars: 5 });
+      renderReviews();
+      renderAdminReviews();
+      event.target.reset();
+      alert("Review added for this browser session. Persistent review storage is not configured yet.");
+    }
+    function removeAdminReview(index) {
+      if (!Number.isInteger(index) || index < 0 || index >= currentReviews.length) return;
+      currentReviews.splice(index, 1);
+      renderReviews();
+      renderAdminReviews();
+      alert("Review removed for this browser session. Persistent review storage is not configured yet.");
+    }
+    function renderAdminFaqs() {
+      const list = document.getElementById("admin-faqs-list");
+      if (list) list.textContent = "FAQ editing is not connected to persistent storage yet.";
+    }
+    function saveHeroSettings() {
+      const banner = document.getElementById("admin-banner-text").value.trim();
+      const badge = document.getElementById("admin-badge-text").value.trim();
+      if (!banner || !badge) return alert("Enter both banner text fields.");
+      document.getElementById("banner-text-display").textContent = banner;
+      document.getElementById("promo-badge-tag").textContent = badge;
+      alert("Banner updated for this browser session only. Persistent site settings are not configured yet.");
+    }
+    function saveAdminPricing() {
+      alert("Product pricing is currently read-only. Persistent product and bundle editing requires a database-backed catalogue.");
+    }
+    function exportToCSV() {
+      if (!isAdminAuthenticated) return alert("Administrator sign-in is required.");
+      if (!currentOrders.length) return alert("There are no orders to export.");
+      const columns = [
+        ["Reference", "ref"], ["Customer", "name"], ["Phone", "phone"],
+        ["Address", "address"], ["Package", "packageTitle"], ["Quantity", "quantity"],
+        ["Subtotal", "subtotal"], ["Shipping", "shipping"], ["Total", "total"],
+        ["Payment method", "paymentMethod"], ["Status", "status"], ["Created at", "date"]
+      ];
+      const csvCell = value => {
+        let text = String(value ?? "");
+        if (/^[\\s]*[=+\\-@]/.test(text)) text = "'" + text;
+        return '"' + text.replace(/"/g, '""') + '"';
+      };
+      const rows = [columns.map(([label]) => csvCell(label)).join(",")];
+      currentOrders.forEach(order => rows.push(columns.map(([, key]) => csvCell(order[key])).join(",")));
+      const blob = new Blob(["\\uFEFF" + rows.join("\\r\\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "amanah-orders-" + new Date().toISOString().slice(0, 10) + ".csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    function filterAdminOrders() {
+      const query = (document.getElementById("admin-search-input")?.value || "").trim().toLowerCase();
+      const filtered = currentOrders.filter(order =>
+        [order.ref, order.name, order.phone, order.address, order.packageTitle, order.status, order.paymentMethod]
+          .some(value => String(value ?? "").toLowerCase().includes(query))
+      );
+      renderAdminOrders(filtered);
+    }
 
     // =========================================================================
     // INSTANT REAL-TIME MESSAGING & AI DELIVERY FLOW (NAME ONLY + DELIVERY FORM)
@@ -1499,9 +1611,23 @@
 
     async function initInstantMessaging() {
       try {
-        await requireVisitor();
+        const user = await requireVisitor();
+        const conversationId = 'conv_' + user.id;
+        const { data: conversation, error } = await window.supabaseClient
+          .from('amanah_conversations')
+          .select('id,customer_name')
+          .eq('id', conversationId)
+          .maybeSingle();
+        if (error) throw error;
+        if (conversation) {
+          customerSession = { id: conversation.id, name: conversation.customer_name };
+          await loadConversationMessages(conversation.id);
+          subscribeToRealtimeMessages(conversation.id);
+        }
         renderCustomerView();
-      } catch (e) { console.error('Visitor auth failed:', e); }
+      } catch (e) {
+        console.error('Visitor chat initialization failed:', e);
+      }
     }
     function addMessage(row) {
       if (!row || DB.messages.some(m => m.id === row.id)) return;
