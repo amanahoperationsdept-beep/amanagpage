@@ -1529,7 +1529,7 @@
         if (!tags.includes(tag)) tags.push(tag);
       });
       tagRules.forEach(([pattern, tag]) => { if (pattern.test(source) && !tags.includes(tag)) tags.push(tag); });
-      const customTags = extra.split(/[\\s,]+/).map(word => word.replace(/[^a-zA-Z0-9]/g, '')).filter(word => word.length >= 3)
+      const customTags = extra.split(/[\s,]+/).map(word => word.replace(/[^a-zA-Z0-9]/g, '')).filter(word => word.length >= 3)
         .slice(0, 3).map(word => '#' + word);
       customTags.forEach(tag => { if (!tags.some(existing => existing.toLowerCase() === tag.toLowerCase())) tags.push(tag); });
       facebookGeneratedSuggestions = hook + '\n\n' + cta + '\n\n' + tags.slice(0, 8).join(' ');
