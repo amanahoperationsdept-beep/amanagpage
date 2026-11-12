@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { fetchAllGraphPages } from "./meta-graph.ts";
 
 const SITE_ORIGIN = Deno.env.get("AMANAH_SITE_ORIGIN") || "https://amanahoperationsdept-beep.github.io";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -131,26 +132,13 @@ async function graphGet(path: string, params: Record<string, string>) {
 // Fetch every cursor page for asset discovery. The bounded page count prevents
 // an unexpected Graph API pagination loop from holding the OAuth callback open.
 async function graphGetAll(path: string, params: Record<string, string>, maxPages = 20) {
-  const items: any[] = [];
-  let after: string | undefined;
-  const seenCursors = new Set<string>();
-  for (let pageNumber = 0; pageNumber < maxPages; pageNumber++) {
+  return fetchAllGraphPages(async (after) => {
     const pageParams = { ...params };
     if (after) pageParams.after = after;
-    const result = await graphGet(path, pageParams);
-    if (Array.isArray(result.data)) items.push(...result.data);
-    const next = result?.paging?.cursors?.after;
-    if (!result?.paging?.next) {
-      return { data: items, pagesFetched: pageNumber + 1, truncated: false };
-    }
-    if (typeof next !== "string" || !next || seenCursors.has(next)) {
-      return { data: items, pagesFetched: pageNumber + 1, truncated: true };
-    }
-    seenCursors.add(next);
-    after = next;
-  }
-  return { data: items, pagesFetched: maxPages, truncated: true };
+    return await graphGet(path, pageParams);
+  }, maxPages);
 }
+
 function callbackPage(ok: boolean, error?: string) {
   const payload = JSON.stringify({ type: "AMANAH_FACEBOOK_OAUTH", ok, error: error || "" }).replace(/</g, "\\u003c");
   const target = JSON.stringify(SITE_ORIGIN);
