@@ -1,9 +1,18 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { fetchAllGraphPages, type GraphPage, type GraphPagesResult } from "./meta-graph.ts";
 
 const SITE_ORIGIN = Deno.env.get("AMANAH_SITE_ORIGIN") || "https://amanahoperationsdept-beep.github.io";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const GRAPH_VERSION = Deno.env.get("META_GRAPH_API_VERSION") || "";
 const GRAPH_BASE = "https://graph.facebook.com/" + GRAPH_VERSION;
+
+type GraphAsset = {
+  id?: string | number;
+  name?: string;
+  access_token?: string;
+  tasks?: string[];
+  [key: string]: unknown;
+};
 const corsHeaders = {
   "Access-Control-Allow-Origin": SITE_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -92,14 +101,56 @@ async function appSecretProof(accessToken: string) {
   const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(accessToken));
   return Array.from(new Uint8Array(signature)).map(v => v.toString(16).padStart(2, "0")).join("");
 }
+function oauthDiagnostic(stage: string, details: Record<string, unknown> = {}) {
+  // Never include OAuth codes, access tokens, App Secrets, appsecret_proof, or request URLs.
+  console.log("[facebook-marketing][oauth]", JSON.stringify({
+    stage,
+    timestamp: new Date().toISOString(),
+    graphVersion: GRAPH_VERSION || "not-set",
+    ...details,
+  }));
+}
+function metaErrorDetails(data: any) {
+  const error = data?.error;
+  if (!error) return {};
+  return {
+    errorType: typeof error.type === "string" ? error.type : undefined,
+    errorCode: typeof error.code === "number" ? error.code : undefined,
+    errorSubcode: typeof error.error_subcode === "number" ? error.error_subcode : undefined,
+    isTransient: typeof error.is_transient === "boolean" ? error.is_transient : undefined,
+    fbtraceId: typeof error.fbtrace_id === "string" ? error.fbtrace_id : undefined,
+    errorMessage: typeof error.message === "string" ? error.message.slice(0, 300) : undefined,
+  };
+}
 async function graphGet(path: string, params: Record<string, string>) {
   const url = new URL(GRAPH_BASE + path);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   const response = await fetch(url);
   const data = await response.json();
+  oauthDiagnostic("graph_request", {
+    endpoint: path,
+    httpStatus: response.status,
+    ok: response.ok && !data.error,
+    ...metaErrorDetails(data),
+  });
   if (!response.ok || data.error) throw new Error(data.error?.message || "Meta Graph API request failed.");
   return data;
 }
+
+// Fetch every cursor page for asset discovery. The bounded page count prevents
+// an unexpected Graph API pagination loop from holding the OAuth callback open.
+async function graphGetAll<T extends GraphAsset = GraphAsset>(
+  path: string,
+  params: Record<string, string>,
+  maxPages = 20,
+): Promise<GraphPagesResult<T>> {
+  return fetchAllGraphPages<T>(async (after) => {
+    const pageParams = { ...params };
+    if (after) pageParams.after = after;
+    return await graphGet(path, pageParams) as GraphPage<T>;
+  }, maxPages);
+}
+
 function callbackPage(ok: boolean, error?: string) {
   const payload = JSON.stringify({ type: "AMANAH_FACEBOOK_OAUTH", ok, error: error || "" }).replace(/</g, "\\u003c");
   const target = JSON.stringify(SITE_ORIGIN);
@@ -129,6 +180,7 @@ async function handleCallback(request: Request) {
 
   try {
     const version = graphVersion();
+    oauthDiagnostic("callback_started", { stateValidated: true });
     const appId = required("META_APP_ID");
     const appSecret = required("META_APP_SECRET");
     const redirect = redirectUri();
@@ -139,6 +191,11 @@ async function handleCallback(request: Request) {
     exchangeUrl.searchParams.set("code", code);
     const shortResponse = await fetch(exchangeUrl);
     const shortData = await shortResponse.json();
+    oauthDiagnostic("authorization_code_exchange", {
+      httpStatus: shortResponse.status,
+      ok: shortResponse.ok && !shortData.error,
+      ...metaErrorDetails(shortData),
+    });
     if (!shortResponse.ok || shortData.error) throw new Error(shortData.error?.message || "Could not exchange the Meta authorization code.");
 
     const longUrl = new URL("https://graph.facebook.com/" + version + "/oauth/access_token");
@@ -148,19 +205,144 @@ async function handleCallback(request: Request) {
     longUrl.searchParams.set("fb_exchange_token", shortData.access_token);
     const longResponse = await fetch(longUrl);
     const longData = await longResponse.json();
+    oauthDiagnostic("long_lived_token_exchange", {
+      httpStatus: longResponse.status,
+      ok: longResponse.ok && !longData.error,
+      ...metaErrorDetails(longData),
+    });
     if (!longResponse.ok || longData.error) throw new Error(longData.error?.message || "Could not obtain a long-lived Meta user token.");
     const userToken = longData.access_token || shortData.access_token;
     const proof = await appSecretProof(userToken);
-    const pagesData = await graphGet("/me/accounts", {
-      fields: "id,name,access_token,tasks",
+
+    // Read the exact grants before discovering assets so a missing scope is not
+    // mistaken for a Page-role problem. Never log tokens or full Graph URLs.
+    let grantedPermissions: string[] = [];
+    try {
+      const permissionData = await graphGet("/me/permissions", {
+        access_token: userToken,
+        appsecret_proof: proof,
+      });
+      const permissions = Array.isArray(permissionData.data) ? permissionData.data : [];
+      grantedPermissions = permissions
+        .filter((item: any) => item.status === "granted")
+        .map((item: any) => String(item.permission || ""));
+      oauthDiagnostic("granted_permissions", {
+        permissions: permissions.map((item: any) => ({
+          permission: typeof item.permission === "string" ? item.permission : "unknown",
+          status: typeof item.status === "string" ? item.status : "unknown",
+        })),
+      });
+    } catch (permissionError) {
+      oauthDiagnostic("granted_permissions_unavailable", {
+        message: permissionError instanceof Error ? permissionError.message.slice(0, 300) : "Permission inspection failed.",
+      });
+    }
+
+    if (!grantedPermissions.includes("pages_show_list")) {
+      throw new Error("Meta did not grant pages_show_list. Reconnect and approve the Page-list permission for this app.");
+    }
+
+    const pageFields = "id,name,access_token,tasks";
+    const graphAuth = { access_token: userToken, appsecret_proof: proof };
+    const pagesData = await graphGetAll("/me/accounts", {
+      ...graphAuth,
+      fields: pageFields,
       limit: "100",
-      access_token: userToken,
-      appsecret_proof: proof,
     });
-    const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
-    if (!pages.length) throw new Error("No Facebook Pages were returned. Confirm this Facebook account has Page access and approve the requested permissions.");
+    let pages = pagesData.data;
+    let discoveryTruncated = pagesData.truncated;
+    let discoverySource = "me_accounts";
+    let businessCount = 0;
+    let ownedPageCount = 0;
+    let clientPageCount = 0;
+
+    // Pages assigned through a Business Portfolio may not appear in /me/accounts
+    // for some account/asset configurations. If the user granted the permission
+    // already configured for this app's use case, inspect their business assets.
+    if (pages.length === 0 && grantedPermissions.includes("business_management")) {
+      const businessesData = await graphGetAll("/me/businesses", {
+        ...graphAuth,
+        fields: "id,name",
+        limit: "100",
+      });
+      const businesses = businessesData.data;
+      discoveryTruncated = discoveryTruncated || businessesData.truncated;
+      businessCount = businesses.length;
+      const discovered = new Map<string, any>();
+      for (const business of businesses) {
+        if (!business?.id) continue;
+        for (const edge of ["owned_pages", "client_pages"]) {
+          try {
+            const result = await graphGetAll("/" + encodeURIComponent(String(business.id)) + "/" + edge, {
+              ...graphAuth,
+              fields: pageFields,
+              limit: "100",
+            });
+            const businessPages = result.data;
+            discoveryTruncated = discoveryTruncated || result.truncated;
+            if (edge === "owned_pages") ownedPageCount += businessPages.length;
+            else clientPageCount += businessPages.length;
+            for (const page of businessPages) {
+              if (page?.id) discovered.set(String(page.id), page);
+            }
+          } catch (businessPageError) {
+            oauthDiagnostic("business_page_discovery_unavailable", {
+              edge,
+              message: businessPageError instanceof Error ? businessPageError.message.slice(0, 250) : "Business Page discovery failed.",
+            });
+          }
+        }
+      }
+      pages = Array.from(discovered.values());
+      if (pages.length > 0) discoverySource = "business_portfolio";
+    }
+
+    const targetPage = pages.find((page: any) => String(page.id || "") === "1210704642128288");
+    oauthDiagnostic("page_discovery_result", {
+      discoverySource,
+      returnedPageCount: pages.length,
+      pageDiscoveryTruncated: discoveryTruncated,
+      businessCount,
+      ownedPageCount,
+      clientPageCount,
+      targetPageFound: Boolean(targetPage),
+      targetPageTasks: Array.isArray(targetPage?.tasks) ? targetPage.tasks : [],
+      pagesWithAccessTokens: pages.filter((page: any) => Boolean(page.access_token)).length,
+      pagesWithoutAccessTokens: pages.filter((page: any) => !page.access_token).length,
+    });
+    if (!pages.length) {
+      if (discoveryTruncated) {
+        throw new Error("Meta Page discovery was incomplete because additional result pages could not be safely retrieved. Check the Edge Function logs and reconnect after the Graph API pagination issue is resolved.");
+      }
+      const businessGrant = grantedPermissions.includes("business_management");
+      throw new Error(
+        "Meta authorized the login but returned no Pages. " +
+        (businessGrant
+          ? "Neither /me/accounts nor the connected Business Portfolio returned a Page. Confirm this Facebook profile is assigned to the target Page in Business Settings and that the app has the required Page permissions."
+          : "This Page is managed through a Business Portfolio. Reconnect and approve business_management, then confirm the Page is assigned to this Facebook profile in Business Settings.")
+      );
+    }
+
+    // This integration is intentionally scoped to Amanah's configured Page.
+    // Do not store tokens for every other Page the connecting profile can access.
+    const selectedPages = pages.filter((page: any) => String(page.id || "") === "1210704642128288");
+    if (selectedPages.length === 0) {
+      if (discoveryTruncated) {
+        throw new Error("Meta Page discovery was incomplete and may not have reached the Amanah Page. Check the Edge Function logs and reconnect after the Graph API pagination issue is resolved.");
+      }
+      throw new Error("Meta returned Pages, but not the configured Amanah Page (1210704642128288). Confirm that this exact Page was selected in the Meta consent screen and assigned to your profile.");
+    }
+    const selectedPage = selectedPages[0];
+    const selectedTasks = Array.isArray(selectedPage.tasks) ? selectedPage.tasks : [];
+    if (!selectedPage.access_token) {
+      throw new Error("Meta found the Amanah Page but did not return its Page access token. Confirm the Page permission grant and try reconnecting.");
+    }
+    if (!selectedTasks.includes("CREATE_CONTENT") && !selectedTasks.includes("MANAGE")) {
+      throw new Error("Your Facebook account can see the Amanah Page but does not have the CREATE_CONTENT task needed to publish posts. Update the Page access in Meta Business Settings.");
+    }
+
     let savedPages = 0;
-    for (const page of pages) {
+    for (const page of selectedPages) {
       if (!page.id || !page.access_token) continue;
       const encrypted = await encryptToken(page.access_token);
       const { error: saveError } = await db.from("facebook_page_connections").upsert({
@@ -177,6 +359,9 @@ async function handleCallback(request: Request) {
     if (savedPages === 0) throw new Error("Meta did not return a Page access token. Check that the connecting account has permission to create content on the selected Page.");
     return callbackPage(true);
   } catch (error) {
+    oauthDiagnostic("callback_failed", {
+      message: error instanceof Error ? error.message.slice(0, 300) : "Meta connection failed.",
+    });
     console.error("Meta OAuth callback failed:", error);
     return callbackPage(false, error instanceof Error ? error.message : "Meta connection failed.");
   }
@@ -213,7 +398,7 @@ Deno.serve(async (request: Request) => {
       authUrl.searchParams.set("redirect_uri", redirectUri());
       authUrl.searchParams.set("state", state);
       authUrl.searchParams.set("response_type", "code");
-      authUrl.searchParams.set("scope", "pages_show_list,pages_read_engagement,pages_manage_posts");
+      authUrl.searchParams.set("scope", "pages_show_list,pages_read_engagement,pages_manage_posts,business_management");
       return json({ auth_url: authUrl.toString() });
     }
 
