@@ -569,7 +569,7 @@
         <div id="customerAuthScreen" class="p-6 flex-1 flex flex-col justify-center space-y-4 bg-slate-50 text-slate-800">
             <div class="text-center space-y-1">
                 <h5 class="font-bold text-base text-slate-800">Welcome to Amanah Support!</h5>
-                <p class="text-xs text-slate-500">Please enter your name to start instant messaging with our AI assistant.</p>
+                <p id="customerWelcomePrompt" class="text-xs text-slate-500">Please enter your name to start instant messaging with our AI assistant.</p>
             </div>
             <div class="space-y-3">
                 <div>
@@ -1256,7 +1256,9 @@
     window.onload = function() {
       renderThumbnails();
       const requestedProduct = new URLSearchParams(window.location.search).get("product");
-      selectProduct(productCatalog[requestedProduct] ? requestedProduct : "barakah");
+      landingProductId = productCatalog[requestedProduct] ? requestedProduct : null;
+      selectProduct(landingProductId || "barakah");
+      updateProductWelcomePrompt();
       renderReviews();
       renderFaqs();
       startCountdownTimer();
@@ -1264,7 +1266,9 @@
       renderAdminPricingList();
       renderAdminReviews();
       renderAdminFaqs();
-      initInstantMessaging().catch(err => console.error('Chat initialization failed:', err));
+      initInstantMessaging()
+        .catch(err => console.error('Chat initialization failed:', err))
+        .finally(scheduleAutoWelcomeChat);
     };
 
     function renderThumbnails() {
@@ -1894,6 +1898,34 @@
     let chatState = 'normal';
     let realtimeChannel = null;
     let DB = { conversations: [], messages: [] };
+    let landingProductId = null;
+
+    function updateProductWelcomePrompt() {
+      const prompt = document.getElementById('customerWelcomePrompt');
+      const product = landingProductId ? productCatalog[landingProductId] : null;
+      if (prompt) {
+        prompt.textContent = product
+          ? `Interested in ${product.marketingName || product.name}? Enter your name to start chatting with Amanah AI Support.`
+          : 'Please enter your name to start instant messaging with our AI assistant.';
+      }
+    }
+
+    function scheduleAutoWelcomeChat() {
+      let alreadyShown = false;
+      try {
+        alreadyShown = sessionStorage.getItem('amanahAutoWelcomeShown') === '1';
+        if (!alreadyShown) sessionStorage.setItem('amanahAutoWelcomeShown', '1');
+      } catch (error) {
+        console.warn('Could not access chat welcome session setting:', error);
+      }
+      if (alreadyShown) return;
+      window.setTimeout(() => {
+        let dismissed = false;
+        try { dismissed = sessionStorage.getItem('amanahAutoWelcomeDismissed') === '1'; } catch (error) {}
+        const chatWindow = document.getElementById('customerChatWindow');
+        if (!dismissed && chatWindow && chatWindow.classList.contains('hidden')) openCustomerChatWidget();
+      }, 3000);
+    }
 
     async function initInstantMessaging() {
       try {
@@ -1953,7 +1985,10 @@
     }
     function toggleCustomerChatWidget(){const w=document.getElementById('customerChatWindow');w.classList.toggle('hidden');if(!w.classList.contains('hidden'))renderCustomerView();}
     function openCustomerChatWidget(){document.getElementById('customerChatWindow').classList.remove('hidden');renderCustomerView();}
-    function closeCustomerChatWidget(){document.getElementById('customerChatWindow').classList.add('hidden');}
+    function closeCustomerChatWidget(){
+      document.getElementById('customerChatWindow').classList.add('hidden');
+      try { sessionStorage.setItem('amanahAutoWelcomeDismissed', '1'); } catch (error) {}
+    }
     function renderCustomerView(){
       if(customerSession.name){document.getElementById('customerAuthScreen').classList.add('hidden');document.getElementById('customerActiveScreen').classList.remove('hidden');renderCustomerMessages();}
       else {document.getElementById('customerAuthScreen').classList.remove('hidden');document.getElementById('customerActiveScreen').classList.add('hidden');}
@@ -1967,7 +2002,10 @@
         const {data,error}=await window.supabaseClient.from('amanah_conversations').upsert({id,visitor_id:user.id,customer_name:name,status:'active',last_message:'Started conversation',updated_at:new Date().toISOString()},{onConflict:'id'}).select().single();
         if(error) throw error;
         customerSession={id:data.id,name}; activeAdminConvId=data.id;
-        const welcome='Hello '+name+'! Welcome to Amanah Health & Wellness AI Support. How may we help you today?';
+        const interestedProduct = landingProductId ? productCatalog[landingProductId] : null;
+        const welcome = interestedProduct
+          ? 'Hello ' + name + '! Welcome to Amanah Health & Wellness AI Support. I see you are interested in ' + (interestedProduct.marketingName || interestedProduct.name) + '. Would you like to know more about this product or how to order?'
+          : 'Hello ' + name + '! Welcome to Amanah Health & Wellness AI Support. How may we help you today?';
         const {data:existing}=await window.supabaseClient.from('amanah_messages').select('id').eq('conversation_id',id).limit(1);
         if(!existing?.length) await persistChatMessage(id,user.id,'ai',welcome);
         await loadConversationMessages(id); subscribeToRealtimeMessages(id); renderCustomerView();
