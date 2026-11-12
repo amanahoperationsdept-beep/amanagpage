@@ -140,8 +140,11 @@ async function graphGetAll(path: string, params: Record<string, string>, maxPage
     const result = await graphGet(path, pageParams);
     if (Array.isArray(result.data)) items.push(...result.data);
     const next = result?.paging?.cursors?.after;
-    if (!result?.paging?.next || typeof next !== "string" || !next || seenCursors.has(next)) {
+    if (!result?.paging?.next) {
       return { data: items, pagesFetched: pageNumber + 1, truncated: false };
+    }
+    if (typeof next !== "string" || !next || seenCursors.has(next)) {
+      return { data: items, pagesFetched: pageNumber + 1, truncated: true };
     }
     seenCursors.add(next);
     after = next;
@@ -247,6 +250,7 @@ async function handleCallback(request: Request) {
       limit: "100",
     });
     let pages = pagesData.data;
+    let discoveryTruncated = pagesData.truncated;
     let discoverySource = "me_accounts";
     let businessCount = 0;
     let ownedPageCount = 0;
@@ -262,6 +266,7 @@ async function handleCallback(request: Request) {
         limit: "100",
       });
       const businesses = businessesData.data;
+      discoveryTruncated = discoveryTruncated || businessesData.truncated;
       businessCount = businesses.length;
       const discovered = new Map<string, any>();
       for (const business of businesses) {
@@ -274,6 +279,7 @@ async function handleCallback(request: Request) {
               limit: "100",
             });
             const businessPages = result.data;
+            discoveryTruncated = discoveryTruncated || result.truncated;
             if (edge === "owned_pages") ownedPageCount += businessPages.length;
             else clientPageCount += businessPages.length;
             for (const page of businessPages) {
@@ -295,7 +301,7 @@ async function handleCallback(request: Request) {
     oauthDiagnostic("page_discovery_result", {
       discoverySource,
       returnedPageCount: pages.length,
-      pageDiscoveryTruncated: pagesData.truncated,
+      pageDiscoveryTruncated: discoveryTruncated,
       businessCount,
       ownedPageCount,
       clientPageCount,
@@ -305,6 +311,9 @@ async function handleCallback(request: Request) {
       pagesWithoutAccessTokens: pages.filter((page: any) => !page.access_token).length,
     });
     if (!pages.length) {
+      if (discoveryTruncated) {
+        throw new Error("Meta Page discovery was incomplete because additional result pages could not be safely retrieved. Check the Edge Function logs and reconnect after the Graph API pagination issue is resolved.");
+      }
       const businessGrant = grantedPermissions.includes("business_management");
       throw new Error(
         "Meta authorized the login but returned no Pages. " +
@@ -318,6 +327,9 @@ async function handleCallback(request: Request) {
     // Do not store tokens for every other Page the connecting profile can access.
     const selectedPages = pages.filter((page: any) => String(page.id || "") === "1210704642128288");
     if (selectedPages.length === 0) {
+      if (discoveryTruncated) {
+        throw new Error("Meta Page discovery was incomplete and may not have reached the Amanah Page. Check the Edge Function logs and reconnect after the Graph API pagination issue is resolved.");
+      }
       throw new Error("Meta returned Pages, but not the configured Amanah Page (1210704642128288). Confirm that this exact Page was selected in the Meta consent screen and assigned to your profile.");
     }
     const selectedPage = selectedPages[0];
