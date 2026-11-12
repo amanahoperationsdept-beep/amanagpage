@@ -5,6 +5,14 @@ const SITE_ORIGIN = Deno.env.get("AMANAH_SITE_ORIGIN") || "https://amanahoperati
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const GRAPH_VERSION = Deno.env.get("META_GRAPH_API_VERSION") || "";
 const GRAPH_BASE = "https://graph.facebook.com/" + GRAPH_VERSION;
+
+type GraphAsset = {
+  id?: string | number;
+  name?: string;
+  access_token?: string;
+  tasks?: string[];
+  [key: string]: unknown;
+};
 const corsHeaders = {
   "Access-Control-Allow-Origin": SITE_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -131,7 +139,7 @@ async function graphGet(path: string, params: Record<string, string>) {
 
 // Fetch every cursor page for asset discovery. The bounded page count prevents
 // an unexpected Graph API pagination loop from holding the OAuth callback open.
-async function graphGetAll<T extends Record<string, unknown> = Record<string, unknown>>(
+async function graphGetAll<T extends GraphAsset = GraphAsset>(
   path: string,
   params: Record<string, string>,
   maxPages = 20,
