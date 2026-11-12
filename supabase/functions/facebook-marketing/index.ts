@@ -92,11 +92,38 @@ async function appSecretProof(accessToken: string) {
   const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(accessToken));
   return Array.from(new Uint8Array(signature)).map(v => v.toString(16).padStart(2, "0")).join("");
 }
+function oauthDiagnostic(stage: string, details: Record<string, unknown> = {}) {
+  // Never include OAuth codes, access tokens, App Secrets, appsecret_proof, or request URLs.
+  console.log("[facebook-marketing][oauth]", JSON.stringify({
+    stage,
+    timestamp: new Date().toISOString(),
+    graphVersion: GRAPH_VERSION || "not-set",
+    ...details,
+  }));
+}
+function metaErrorDetails(data: any) {
+  const error = data?.error;
+  if (!error) return {};
+  return {
+    errorType: typeof error.type === "string" ? error.type : undefined,
+    errorCode: typeof error.code === "number" ? error.code : undefined,
+    errorSubcode: typeof error.error_subcode === "number" ? error.error_subcode : undefined,
+    isTransient: typeof error.is_transient === "boolean" ? error.is_transient : undefined,
+    fbtraceId: typeof error.fbtrace_id === "string" ? error.fbtrace_id : undefined,
+    errorMessage: typeof error.message === "string" ? error.message.slice(0, 300) : undefined,
+  };
+}
 async function graphGet(path: string, params: Record<string, string>) {
   const url = new URL(GRAPH_BASE + path);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   const response = await fetch(url);
   const data = await response.json();
+  oauthDiagnostic("graph_request", {
+    endpoint: path,
+    httpStatus: response.status,
+    ok: response.ok && !data.error,
+    ...metaErrorDetails(data),
+  });
   if (!response.ok || data.error) throw new Error(data.error?.message || "Meta Graph API request failed.");
   return data;
 }
@@ -129,6 +156,7 @@ async function handleCallback(request: Request) {
 
   try {
     const version = graphVersion();
+    oauthDiagnostic("callback_started", { stateValidated: true });
     const appId = required("META_APP_ID");
     const appSecret = required("META_APP_SECRET");
     const redirect = redirectUri();
@@ -139,6 +167,11 @@ async function handleCallback(request: Request) {
     exchangeUrl.searchParams.set("code", code);
     const shortResponse = await fetch(exchangeUrl);
     const shortData = await shortResponse.json();
+    oauthDiagnostic("authorization_code_exchange", {
+      httpStatus: shortResponse.status,
+      ok: shortResponse.ok && !shortData.error,
+      ...metaErrorDetails(shortData),
+    });
     if (!shortResponse.ok || shortData.error) throw new Error(shortData.error?.message || "Could not exchange the Meta authorization code.");
 
     const longUrl = new URL("https://graph.facebook.com/" + version + "/oauth/access_token");
@@ -148,9 +181,34 @@ async function handleCallback(request: Request) {
     longUrl.searchParams.set("fb_exchange_token", shortData.access_token);
     const longResponse = await fetch(longUrl);
     const longData = await longResponse.json();
+    oauthDiagnostic("long_lived_token_exchange", {
+      httpStatus: longResponse.status,
+      ok: longResponse.ok && !longData.error,
+      ...metaErrorDetails(longData),
+    });
     if (!longResponse.ok || longData.error) throw new Error(longData.error?.message || "Could not obtain a long-lived Meta user token.");
     const userToken = longData.access_token || shortData.access_token;
     const proof = await appSecretProof(userToken);
+
+    // Permission inspection is diagnostic only; its failure must not block the connection attempt.
+    try {
+      const permissionData = await graphGet("/me/permissions", {
+        access_token: userToken,
+        appsecret_proof: proof,
+      });
+      const permissions = Array.isArray(permissionData.data) ? permissionData.data : [];
+      oauthDiagnostic("granted_permissions", {
+        permissions: permissions.map((item: any) => ({
+          permission: typeof item.permission === "string" ? item.permission : "unknown",
+          status: typeof item.status === "string" ? item.status : "unknown",
+        })),
+      });
+    } catch (permissionError) {
+      oauthDiagnostic("granted_permissions_unavailable", {
+        message: permissionError instanceof Error ? permissionError.message.slice(0, 300) : "Permission inspection failed.",
+      });
+    }
+
     const pagesData = await graphGet("/me/accounts", {
       fields: "id,name,access_token,tasks",
       limit: "100",
@@ -158,7 +216,15 @@ async function handleCallback(request: Request) {
       appsecret_proof: proof,
     });
     const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
-    if (!pages.length) throw new Error("No Facebook Pages were returned. Confirm this Facebook account has Page access and approve the requested permissions.");
+    const targetPage = pages.find((page: any) => String(page.id || "") === "1210704642128288");
+    oauthDiagnostic("page_discovery_result", {
+      returnedPageCount: pages.length,
+      targetPageFound: Boolean(targetPage),
+      targetPageTasks: Array.isArray(targetPage?.tasks) ? targetPage.tasks : [],
+      pagesWithAccessTokens: pages.filter((page: any) => Boolean(page.access_token)).length,
+      pagingPresent: Boolean(pagesData.paging),
+    });
+    if (!pages.length) throw new Error("No Facebook Pages were returned. Meta's /me/accounts response contained zero Pages. Check the facebook-marketing Edge Function logs for the safe OAuth diagnostic stages.");
     let savedPages = 0;
     for (const page of pages) {
       if (!page.id || !page.access_token) continue;
@@ -177,6 +243,9 @@ async function handleCallback(request: Request) {
     if (savedPages === 0) throw new Error("Meta did not return a Page access token. Check that the connecting account has permission to create content on the selected Page.");
     return callbackPage(true);
   } catch (error) {
+    oauthDiagnostic("callback_failed", {
+      message: error instanceof Error ? error.message.slice(0, 300) : "Meta connection failed.",
+    });
     console.error("Meta OAuth callback failed:", error);
     return callbackPage(false, error instanceof Error ? error.message : "Meta connection failed.");
   }
