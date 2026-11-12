@@ -291,8 +291,24 @@ async function handleCallback(request: Request) {
           : "This Page is managed through a Business Portfolio. Reconnect and approve business_management, then confirm the Page is assigned to this Facebook profile in Business Settings.")
       );
     }
+
+    // This integration is intentionally scoped to Amanah's configured Page.
+    // Do not store tokens for every other Page the connecting profile can access.
+    const selectedPages = pages.filter((page: any) => String(page.id || "") === "1210704642128288");
+    if (selectedPages.length === 0) {
+      throw new Error("Meta returned Pages, but not the configured Amanah Page (1210704642128288). Confirm that this exact Page was selected in the Meta consent screen and assigned to your profile.");
+    }
+    const selectedPage = selectedPages[0];
+    const selectedTasks = Array.isArray(selectedPage.tasks) ? selectedPage.tasks : [];
+    if (!selectedPage.access_token) {
+      throw new Error("Meta found the Amanah Page but did not return its Page access token. Confirm the Page permission grant and try reconnecting.");
+    }
+    if (!selectedTasks.includes("CREATE_CONTENT") && !selectedTasks.includes("MANAGE")) {
+      throw new Error("Your Facebook account can see the Amanah Page but does not have the CREATE_CONTENT task needed to publish posts. Update the Page access in Meta Business Settings.");
+    }
+
     let savedPages = 0;
-    for (const page of pages) {
+    for (const page of selectedPages) {
       if (!page.id || !page.access_token) continue;
       const encrypted = await encryptToken(page.access_token);
       const { error: saveError } = await db.from("facebook_page_connections").upsert({
