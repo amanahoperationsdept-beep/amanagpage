@@ -418,6 +418,123 @@ Deno.serve(async (request: Request) => {
       return json({ success: true });
     }
 
+    if (action === "publish_media") {
+      const pageId = String(body.page_id || "");
+      const message = String(body.message || "").trim();
+      const link = String(body.link || "").trim();
+      const mediaKind = String(body.media_kind || "");
+      const mediaPaths = Array.isArray(body.media_paths) ? body.media_paths.map((value: unknown) => String(value)) : [];
+      if (!pageId || !message) return json({ error: "Page and post caption are required." }, 400);
+      if (message.length > 5000) return json({ error: "Post caption exceeds 5,000 characters." }, 400);
+      if (pageId !== "1210704642128288") return json({ error: "Only the configured Amanah Facebook Page can receive posts." }, 403);
+      if (link) {
+        let parsedLink: URL;
+        try { parsedLink = new URL(link); } catch { return json({ error: "The website link must be a valid HTTPS URL." }, 400); }
+        if (parsedLink.protocol !== "https:") return json({ error: "Only HTTPS links can be published." }, 400);
+      }
+      if (!["photos", "video"].includes(mediaKind)) return json({ error: "Choose photos or one video for this post." }, 400);
+      if (mediaKind === "photos" && (mediaPaths.length < 1 || mediaPaths.length > 10)) {
+        return json({ error: "A photo post must contain between 1 and 10 photos." }, 400);
+      }
+      if (mediaKind === "video" && mediaPaths.length !== 1) {
+        return json({ error: "A video post must contain exactly one video." }, 400);
+      }
+      if (mediaPaths.some((path: string) =>
+        !path.startsWith(user.id + "/") || path.split("/").length !== 2 || path.includes("..")
+      )) {
+        return json({ error: "One or more media files do not belong to this administrator session." }, 403);
+      }
+
+      const { data: page, error: pageError } = await db.from("facebook_page_connections")
+        .select("page_id,page_name,token_ciphertext,token_iv")
+        .eq("page_id", pageId).maybeSingle();
+      if (pageError || !page) return json({ error: "That Facebook Page is not connected to your administrator account." }, 404);
+
+      try {
+        const pageToken = await decryptToken(page.token_ciphertext, page.token_iv);
+        const proof = await appSecretProof(pageToken);
+        let postId = "";
+
+        if (mediaKind === "photos") {
+          const attachedMedia: string[] = [];
+          for (const path of mediaPaths) {
+            const { data: file, error: downloadError } = await db.storage.from("facebook-post-media").download(path);
+            if (downloadError || !file) throw new Error("Could not retrieve an uploaded photo from secure storage.");
+            if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+              throw new Error("Only JPG, PNG, and WebP photos are supported.");
+            }
+            if (file.size > 8 * 1024 * 1024) throw new Error("Each photo must be no larger than 8 MB.");
+            const photoForm = new FormData();
+            photoForm.set("source", file, path.split("/").pop() || "amanah-photo");
+            photoForm.set("published", "false");
+            photoForm.set("access_token", pageToken);
+            photoForm.set("appsecret_proof", proof);
+            const photoResponse = await fetch(GRAPH_BASE + "/" + encodeURIComponent(pageId) + "/photos", {
+              method: "POST",
+              body: photoForm,
+            });
+            const photoResult = await photoResponse.json();
+            if (!photoResponse.ok || photoResult.error || !photoResult.id) {
+              console.error("Meta photo upload failed:", photoResult.error || { status: photoResponse.status });
+              throw new Error(photoResult.error?.message || "Meta could not upload one of the selected photos.");
+            }
+            attachedMedia.push(String(photoResult.id));
+          }
+
+          const postForm = new FormData();
+          postForm.set("message", message);
+          attachedMedia.forEach((mediaId, index) => {
+            postForm.set("attached_media[" + index + "]", JSON.stringify({ media_fbid: mediaId }));
+          });
+          if (link) postForm.set("link", link);
+          postForm.set("published", "true");
+          postForm.set("access_token", pageToken);
+          postForm.set("appsecret_proof", proof);
+          const response = await fetch(GRAPH_BASE + "/" + encodeURIComponent(pageId) + "/feed", {
+            method: "POST",
+            body: postForm,
+          });
+          const result = await response.json();
+          if (!response.ok || result.error) {
+            console.error("Meta photo post failed:", result.error || { status: response.status });
+            throw new Error(result.error?.message || "Meta rejected the photo post.");
+          }
+          postId = String(result.id || result.post_id || "");
+        } else {
+          const path = mediaPaths[0];
+          const { data: file, error: downloadError } = await db.storage.from("facebook-post-media").download(path);
+          if (downloadError || !file) throw new Error("Could not retrieve the uploaded video from secure storage.");
+          if (!["video/mp4", "video/quicktime"].includes(file.type)) {
+            throw new Error("Only MP4 and MOV videos are supported.");
+          }
+          if (file.size > 25 * 1024 * 1024) throw new Error("The video must be no larger than 25 MB.");
+          const videoForm = new FormData();
+          videoForm.set("source", file, path.split("/").pop() || "amanah-video");
+          videoForm.set("title", "Amanah Health & Wellness");
+          videoForm.set("description", message + (link ? "\n\n" + link : ""));
+          videoForm.set("published", "true");
+          videoForm.set("access_token", pageToken);
+          videoForm.set("appsecret_proof", proof);
+          const response = await fetch(GRAPH_BASE + "/" + encodeURIComponent(pageId) + "/videos", {
+            method: "POST",
+            body: videoForm,
+          });
+          const result = await response.json();
+          if (!response.ok || result.error) {
+            console.error("Meta video upload failed:", result.error || { status: response.status });
+            throw new Error(result.error?.message || "Meta rejected the video upload.");
+          }
+          postId = String(result.id || result.post_id || "");
+        }
+
+        if (!postId) throw new Error("Meta accepted the media request but did not return a post ID.");
+        return json({ success: true, post_id: postId, media_kind: mediaKind });
+      } finally {
+        const { error: cleanupError } = await db.storage.from("facebook-post-media").remove(mediaPaths);
+        if (cleanupError) console.error("Temporary Facebook media cleanup failed:", cleanupError.message);
+      }
+    }
+
     if (action === "publish") {
       const pageId = String(body.page_id || "");
       const message = String(body.message || "").trim();
