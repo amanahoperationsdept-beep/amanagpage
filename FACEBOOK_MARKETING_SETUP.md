@@ -8,6 +8,8 @@ In the Supabase project used by this store, open SQL Editor and run the statemen
 
 The migration creates the OAuth-state and encrypted Page-connection tables. It does not change existing order, chat, or customer tables.
 
+The storefront checkout also needs the additive migration `supabase/migrations/202611120001_checkout_details.sql`. Run its three `ALTER TABLE` statements in Supabase SQL Editor (or apply it with the Supabase CLI). It adds `confirm_phone`, `payment_method`, and `delivery_notes` to `public.amanah_orders` so the checkout does not discard those submitted fields. Existing order records are preserved.
+
 ## 2. Create/configure a Meta app
 
 Open https://developers.facebook.com/apps/ and create or select a Meta app.
