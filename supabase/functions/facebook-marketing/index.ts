@@ -127,6 +127,27 @@ async function graphGet(path: string, params: Record<string, string>) {
   if (!response.ok || data.error) throw new Error(data.error?.message || "Meta Graph API request failed.");
   return data;
 }
+
+// Fetch every cursor page for asset discovery. The bounded page count prevents
+// an unexpected Graph API pagination loop from holding the OAuth callback open.
+async function graphGetAll(path: string, params: Record<string, string>, maxPages = 20) {
+  const items: any[] = [];
+  let after: string | undefined;
+  const seenCursors = new Set<string>();
+  for (let pageNumber = 0; pageNumber < maxPages; pageNumber++) {
+    const pageParams = { ...params };
+    if (after) pageParams.after = after;
+    const result = await graphGet(path, pageParams);
+    if (Array.isArray(result.data)) items.push(...result.data);
+    const next = result?.paging?.cursors?.after;
+    if (!result?.paging?.next || typeof next !== "string" || !next || seenCursors.has(next)) {
+      return { data: items, pagesFetched: pageNumber + 1, truncated: false };
+    }
+    seenCursors.add(next);
+    after = next;
+  }
+  return { data: items, pagesFetched: maxPages, truncated: true };
+}
 function callbackPage(ok: boolean, error?: string) {
   const payload = JSON.stringify({ type: "AMANAH_FACEBOOK_OAUTH", ok, error: error || "" }).replace(/</g, "\\u003c");
   const target = JSON.stringify(SITE_ORIGIN);
@@ -220,12 +241,12 @@ async function handleCallback(request: Request) {
 
     const pageFields = "id,name,access_token,tasks";
     const graphAuth = { access_token: userToken, appsecret_proof: proof };
-    const pagesData = await graphGet("/me/accounts", {
+    const pagesData = await graphGetAll("/me/accounts", {
       ...graphAuth,
       fields: pageFields,
       limit: "100",
     });
-    let pages = Array.isArray(pagesData.data) ? pagesData.data : [];
+    let pages = pagesData.data;
     let discoverySource = "me_accounts";
     let businessCount = 0;
     let ownedPageCount = 0;
@@ -235,24 +256,24 @@ async function handleCallback(request: Request) {
     // for some account/asset configurations. If the user granted the permission
     // already configured for this app's use case, inspect their business assets.
     if (pages.length === 0 && grantedPermissions.includes("business_management")) {
-      const businessesData = await graphGet("/me/businesses", {
+      const businessesData = await graphGetAll("/me/businesses", {
         ...graphAuth,
         fields: "id,name",
         limit: "100",
       });
-      const businesses = Array.isArray(businessesData.data) ? businessesData.data : [];
+      const businesses = businessesData.data;
       businessCount = businesses.length;
       const discovered = new Map<string, any>();
       for (const business of businesses) {
         if (!business?.id) continue;
         for (const edge of ["owned_pages", "client_pages"]) {
           try {
-            const result = await graphGet("/" + encodeURIComponent(String(business.id)) + "/" + edge, {
+            const result = await graphGetAll("/" + encodeURIComponent(String(business.id)) + "/" + edge, {
               ...graphAuth,
               fields: pageFields,
               limit: "100",
             });
-            const businessPages = Array.isArray(result.data) ? result.data : [];
+            const businessPages = result.data;
             if (edge === "owned_pages") ownedPageCount += businessPages.length;
             else clientPageCount += businessPages.length;
             for (const page of businessPages) {
@@ -274,6 +295,7 @@ async function handleCallback(request: Request) {
     oauthDiagnostic("page_discovery_result", {
       discoverySource,
       returnedPageCount: pages.length,
+      pageDiscoveryTruncated: pagesData.truncated,
       businessCount,
       ownedPageCount,
       clientPageCount,
