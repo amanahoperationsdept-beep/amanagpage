@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { fetchAllGraphPages } from "./meta-graph.ts";
+import { fetchAllGraphPages, type GraphPage, type GraphPagesResult } from "./meta-graph.ts";
 
 const SITE_ORIGIN = Deno.env.get("AMANAH_SITE_ORIGIN") || "https://amanahoperationsdept-beep.github.io";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -131,11 +131,15 @@ async function graphGet(path: string, params: Record<string, string>) {
 
 // Fetch every cursor page for asset discovery. The bounded page count prevents
 // an unexpected Graph API pagination loop from holding the OAuth callback open.
-async function graphGetAll(path: string, params: Record<string, string>, maxPages = 20) {
-  return fetchAllGraphPages(async (after) => {
+async function graphGetAll<T extends Record<string, unknown> = Record<string, unknown>>(
+  path: string,
+  params: Record<string, string>,
+  maxPages = 20,
+): Promise<GraphPagesResult<T>> {
+  return fetchAllGraphPages<T>(async (after) => {
     const pageParams = { ...params };
     if (after) pageParams.after = after;
-    return await graphGet(path, pageParams);
+    return await graphGet(path, pageParams) as GraphPage<T>;
   }, maxPages);
 }
 
