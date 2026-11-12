@@ -190,13 +190,18 @@ async function handleCallback(request: Request) {
     const userToken = longData.access_token || shortData.access_token;
     const proof = await appSecretProof(userToken);
 
-    // Permission inspection is diagnostic only; its failure must not block the connection attempt.
+    // Read the exact grants before discovering assets so a missing scope is not
+    // mistaken for a Page-role problem. Never log tokens or full Graph URLs.
+    let grantedPermissions: string[] = [];
     try {
       const permissionData = await graphGet("/me/permissions", {
         access_token: userToken,
         appsecret_proof: proof,
       });
       const permissions = Array.isArray(permissionData.data) ? permissionData.data : [];
+      grantedPermissions = permissions
+        .filter((item: any) => item.status === "granted")
+        .map((item: any) => String(item.permission || ""));
       oauthDiagnostic("granted_permissions", {
         permissions: permissions.map((item: any) => ({
           permission: typeof item.permission === "string" ? item.permission : "unknown",
@@ -209,22 +214,83 @@ async function handleCallback(request: Request) {
       });
     }
 
+    if (!grantedPermissions.includes("pages_show_list")) {
+      throw new Error("Meta did not grant pages_show_list. Reconnect and approve the Page-list permission for this app.");
+    }
+
+    const pageFields = "id,name,access_token,tasks";
+    const graphAuth = { access_token: userToken, appsecret_proof: proof };
     const pagesData = await graphGet("/me/accounts", {
-      fields: "id,name,access_token,tasks",
+      ...graphAuth,
+      fields: pageFields,
       limit: "100",
-      access_token: userToken,
-      appsecret_proof: proof,
     });
-    const pages = Array.isArray(pagesData.data) ? pagesData.data : [];
+    let pages = Array.isArray(pagesData.data) ? pagesData.data : [];
+    let discoverySource = "me_accounts";
+    let businessCount = 0;
+    let ownedPageCount = 0;
+    let clientPageCount = 0;
+
+    // Pages assigned through a Business Portfolio may not appear in /me/accounts
+    // for some account/asset configurations. If the user granted the permission
+    // already configured for this app's use case, inspect their business assets.
+    if (pages.length === 0 && grantedPermissions.includes("business_management")) {
+      const businessesData = await graphGet("/me/businesses", {
+        ...graphAuth,
+        fields: "id,name",
+        limit: "100",
+      });
+      const businesses = Array.isArray(businessesData.data) ? businessesData.data : [];
+      businessCount = businesses.length;
+      const discovered = new Map<string, any>();
+      for (const business of businesses) {
+        if (!business?.id) continue;
+        for (const edge of ["owned_pages", "client_pages"]) {
+          try {
+            const result = await graphGet("/" + encodeURIComponent(String(business.id)) + "/" + edge, {
+              ...graphAuth,
+              fields: pageFields,
+              limit: "100",
+            });
+            const businessPages = Array.isArray(result.data) ? result.data : [];
+            if (edge === "owned_pages") ownedPageCount += businessPages.length;
+            else clientPageCount += businessPages.length;
+            for (const page of businessPages) {
+              if (page?.id) discovered.set(String(page.id), page);
+            }
+          } catch (businessPageError) {
+            oauthDiagnostic("business_page_discovery_unavailable", {
+              edge,
+              message: businessPageError instanceof Error ? businessPageError.message.slice(0, 250) : "Business Page discovery failed.",
+            });
+          }
+        }
+      }
+      pages = Array.from(discovered.values());
+      if (pages.length > 0) discoverySource = "business_portfolio";
+    }
+
     const targetPage = pages.find((page: any) => String(page.id || "") === "1210704642128288");
     oauthDiagnostic("page_discovery_result", {
+      discoverySource,
       returnedPageCount: pages.length,
+      businessCount,
+      ownedPageCount,
+      clientPageCount,
       targetPageFound: Boolean(targetPage),
       targetPageTasks: Array.isArray(targetPage?.tasks) ? targetPage.tasks : [],
       pagesWithAccessTokens: pages.filter((page: any) => Boolean(page.access_token)).length,
-      pagingPresent: Boolean(pagesData.paging),
+      pagesWithoutAccessTokens: pages.filter((page: any) => !page.access_token).length,
     });
-    if (!pages.length) throw new Error("No Facebook Pages were returned. Meta's /me/accounts response contained zero Pages. Check the facebook-marketing Edge Function logs for the safe OAuth diagnostic stages.");
+    if (!pages.length) {
+      const businessGrant = grantedPermissions.includes("business_management");
+      throw new Error(
+        "Meta authorized the login but returned no Pages. " +
+        (businessGrant
+          ? "Neither /me/accounts nor the connected Business Portfolio returned a Page. Confirm this Facebook profile is assigned to the target Page in Business Settings and that the app has the required Page permissions."
+          : "This Page is managed through a Business Portfolio. Reconnect and approve business_management, then confirm the Page is assigned to this Facebook profile in Business Settings.")
+      );
+    }
     let savedPages = 0;
     for (const page of pages) {
       if (!page.id || !page.access_token) continue;
@@ -282,7 +348,7 @@ Deno.serve(async (request: Request) => {
       authUrl.searchParams.set("redirect_uri", redirectUri());
       authUrl.searchParams.set("state", state);
       authUrl.searchParams.set("response_type", "code");
-      authUrl.searchParams.set("scope", "pages_show_list,pages_read_engagement,pages_manage_posts");
+      authUrl.searchParams.set("scope", "pages_show_list,pages_read_engagement,pages_manage_posts,business_management");
       return json({ auth_url: authUrl.toString() });
     }
 
