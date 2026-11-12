@@ -22,8 +22,11 @@ Request only the Page permissions needed for this feature:
 - pages_show_list
 - pages_read_engagement
 - pages_manage_posts
+- business_management
 
-The Facebook user connecting the integration must have the appropriate access/tasks on the target Page. Meta may require App Review and Advanced Access before users outside the app's roles can use these permissions. Use Meta's current app dashboard and permissions review requirements.
+The integration first checks the user's Pages through `/me/accounts`. If the Page is assigned through a Business Portfolio and is not returned there, it uses the granted `business_management` permission to inspect the user's Business Portfolio Pages (owned and client Pages). This is why `business_management` is requested in addition to the Page permissions.
+
+The Facebook user connecting the integration must have the appropriate access/tasks on the target Page and access to its Business Portfolio when applicable. Meta may require App Review and Advanced Access before users outside the app's roles can use these permissions. Use Meta's current app dashboard and permissions review requirements.
 
 ## 3. Set Supabase Edge Function secrets
 
