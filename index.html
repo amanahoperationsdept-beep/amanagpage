@@ -912,6 +912,34 @@
               <textarea id="facebook-post-message" rows="5" maxlength="5000" placeholder="Write your Facebook post..." class="w-full px-3 py-3 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
               <p class="text-[10px] text-gray-400 mt-1">Maximum 5,000 characters.</p>
             </div>
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 space-y-3">
+              <div>
+                <h5 class="text-sm font-bold text-gray-800"><i class="fa-solid fa-wand-magic-sparkles mr-1 text-emerald-700"></i> Posting Hook & Hashtag Assistant</h5>
+                <p class="text-[11px] text-gray-500 mt-1">Create an attention-grabbing opening, a call to action, and relevant hashtags from your product and caption. Suggestions are generated in your browser and remain editable.</p>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label class="block text-xs font-semibold text-gray-700">Posting tone
+                  <select id="facebook-post-tone" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-gray-300 bg-white text-sm">
+                    <option value="friendly">Friendly & engaging</option>
+                    <option value="professional">Professional</option>
+                    <option value="curiosity">Curiosity / question</option>
+                    <option value="promotional">Promotional / offer</option>
+                  </select>
+                </label>
+                <label class="block text-xs font-semibold text-gray-700">Extra keywords (optional)
+                  <input id="facebook-post-keywords" type="text" maxlength="160" placeholder="e.g. green coffee, wellness, bundle" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-gray-300 text-sm" />
+                </label>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="generateFacebookPostSuggestions()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Generate hook & hashtags</button>
+                <button type="button" onclick="addFacebookSuggestionsToCaption()" class="bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-xs px-4 py-2.5 rounded-xl">Add to caption</button>
+              </div>
+              <div>
+                <label for="facebook-post-suggestions" class="block text-xs font-bold text-gray-600 mb-1">Generated suggestions (editable)</label>
+                <textarea id="facebook-post-suggestions" rows="4" maxlength="1500" placeholder="Your hook, call to action, and hashtags will appear here." class="w-full px-3 py-3 rounded-xl border border-gray-300 bg-white text-sm"></textarea>
+              </div>
+              <p class="text-[10px] text-gray-500">Review product wording before posting. The assistant avoids inventing specific health results or guarantees.</p>
+            </div>
             <div class="rounded-xl border border-gray-200 p-4 space-y-3">
               <div>
                 <h5 class="text-sm font-bold text-gray-800"><i class="fa-solid fa-photo-film mr-1 text-emerald-700"></i> Add photos or video</h5>
@@ -1449,6 +1477,52 @@
       }
     }
 
+    let facebookGeneratedSuggestions = '';
+
+    function generateFacebookPostSuggestions() {
+      const product = productCatalog[currentProductId];
+      const caption = document.getElementById('facebook-post-message').value.trim();
+      const extra = document.getElementById('facebook-post-keywords').value.trim();
+      const source = [product?.name || '', product?.shortDesc || '', caption, extra].join(' ').toLowerCase();
+      const productName = product?.name || (extra.split(',')[0].trim() || 'Amanah products');
+      const tone = document.getElementById('facebook-post-tone').value;
+      const hooks = {
+        friendly: 'A little something to make your day better! Discover ' + productName + ' with Amanah.',
+        professional: 'Discover the Amanah difference with ' + productName + '. Learn more about our product offering.',
+        curiosity: 'Have you discovered ' + productName + ' yet? Here is something worth checking out.',
+        promotional: 'Your next Amanah favorite may be here! Check out ' + productName + ' and ask us about current offers.'
+      };
+      const hook = hooks[tone] || hooks.friendly;
+      const cta = 'Send us a message for product details, availability, and ordering assistance.';
+      const tagRules = [
+        [/green coffee|coffee/, '#GreenCoffee'],
+        [/wellness|health|herbal/, '#Wellness'],
+        [/barley/, '#Barley'],
+        [/mangosteen/, '#Mangosteen'],
+        [/tea|green tea/, '#GreenTea'],
+        [/bundle|pack|promo|offer|discount/, '#AmanahDeals'],
+        [/beauty|skin|collagen/, '#BeautyWellness'],
+        [/distributor|wholesale|reseller/, '#AmanahPartners']
+      ];
+      const tags = ['#AmanahDMC', '#AmanahHealthAndWellness', '#Philippines'];
+      tagRules.forEach(([pattern, tag]) => { if (pattern.test(source) && !tags.includes(tag)) tags.push(tag); });
+      const customTags = extra.split(/[\s,]+/).map(word => word.replace(/[^a-zA-Z0-9]/g, '')).filter(word => word.length >= 3)
+        .slice(0, 3).map(word => '#' + word);
+      customTags.forEach(tag => { if (!tags.some(existing => existing.toLowerCase() === tag.toLowerCase())) tags.push(tag); });
+      facebookGeneratedSuggestions = hook + '\n\n' + cta + '\n\n' + tags.slice(0, 8).join(' ');
+      document.getElementById('facebook-post-suggestions').value = facebookGeneratedSuggestions;
+      showFacebookStatus('Hook and hashtag suggestions generated. Review and edit them before adding to your caption.', true);
+    }
+
+    function addFacebookSuggestionsToCaption() {
+      const suggestions = document.getElementById('facebook-post-suggestions').value.trim();
+      const caption = document.getElementById('facebook-post-message');
+      if (!suggestions) return showFacebookStatus('Generate or enter suggestions first.', false);
+      if (caption.value.includes(suggestions)) return showFacebookStatus('These suggestions are already in the caption.', true);
+      caption.value = caption.value.trim() ? caption.value.trim() + '\n\n' + suggestions : suggestions;
+      showFacebookStatus('Suggestions added to the caption. You can still edit the final post.', true);
+    }
+
     function prefillFacebookPost() {
       const product = productCatalog[currentProductId];
       if (!product) return showFacebookStatus('Select a product first.', false);
@@ -1458,7 +1532,7 @@
         '\n\nVisit Amanah Health & Wellness and place your order today!';
       document.getElementById('facebook-post-link').value = link;
       document.getElementById('facebook-product-hint').textContent = 'Prepared from: ' + product.name;
-      showFacebookStatus('Product caption and store link are ready. Review them before publishing.', true);
+      showFacebookStatus('Product caption and store link are ready. Generate a hook and relevant hashtags if desired.', true);
     }
 
     function clearFacebookMediaPreviews() {
