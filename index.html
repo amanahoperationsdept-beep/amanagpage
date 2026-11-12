@@ -918,6 +918,20 @@
                 <p class="text-[11px] text-gray-500 mt-1">Create an attention-grabbing opening, a call to action, and relevant hashtags from your product and caption. Suggestions are generated in your browser and remain editable.</p>
                 <p id="facebook-assistant-product" class="text-[11px] font-semibold text-emerald-800 mt-2">Using selected product: —</p>
               </div>
+              <div>
+                <label for="facebook-assistant-product-select" class="block text-xs font-semibold text-gray-700">Product category / product
+                  <select id="facebook-assistant-product-select" onchange="selectProduct(this.value)" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-gray-300 bg-white text-sm">
+                    <option value="baskug">Baskug Coffee</option>
+                    <option value="barakah">Barakah Green Coffee</option>
+                    <option value="glutagen">Glutagen CEE</option>
+                    <option value="rub">Amanah Herbal Rub</option>
+                    <option value="herbaloil">Amanah Herbal Oil</option>
+                    <option value="serpentina">Amanah Serpentina</option>
+                    <option value="spirulina">Amanah Spirulina</option>
+                  </select>
+                </label>
+                <p class="text-[11px] text-gray-500 mt-1">Choose the product for this post. The product preview and generated hook will use the same selection.</p>
+              </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label class="block text-xs font-semibold text-gray-700">Posting tone
                   <select id="facebook-post-tone" class="mt-1 w-full px-3 py-2.5 rounded-xl border border-gray-300 bg-white text-sm">
@@ -1266,6 +1280,8 @@
       const prod = productCatalog[prodId];
       const assistantProduct = document.getElementById("facebook-assistant-product");
       if (assistantProduct) assistantProduct.textContent = "Using selected product: " + (prod.marketingName || prod.name);
+      const assistantProductSelect = document.getElementById("facebook-assistant-product-select");
+      if (assistantProductSelect) assistantProductSelect.value = prodId;
       document.getElementById("main-product-img").src = prod.mainImg;
       document.getElementById("product-title-display").textContent = prod.name;
       document.getElementById("product-desc-display").textContent = prod.shortDesc;
@@ -1497,8 +1513,15 @@
     let facebookGeneratedSuggestions = '';
 
     function generateFacebookPostSuggestions() {
-      // Always use the same product ID that drives the visible product preview.
-      const product = productCatalog[currentProductId];
+      // The explicit assistant selector is authoritative; synchronize the store preview before generating.
+      const productSelect = document.getElementById('facebook-assistant-product-select');
+      const selectedProductId = productSelect?.value || currentProductId;
+      const product = productCatalog[selectedProductId];
+      if (!product) {
+        showFacebookStatus('Please choose a product before generating the hook and hashtags.', false);
+        return;
+      }
+      if (selectedProductId !== currentProductId) selectProduct(selectedProductId);
       const caption = document.getElementById('facebook-post-message').value.trim();
       const extra = document.getElementById('facebook-post-keywords').value.trim();
       const productName = product?.marketingName || product?.name || 'Amanah products';
