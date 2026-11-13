@@ -370,7 +370,15 @@ async function handleCallback(request: Request) {
 Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const url = new URL(request.url);
-  if (request.method === "GET" && url.searchParams.get("action") === "callback") {
+  // Meta redirects the browser to this function with an authorization code
+  // (or an OAuth error). Accept the callback even if a configured redirect URI
+  // accidentally omits ?action=callback; handleCallback still validates the
+  // one-time, expiring OAuth state before exchanging any code or saving tokens.
+  const isOAuthCallback = url.searchParams.get("action") === "callback" ||
+    url.searchParams.has("code") ||
+    url.searchParams.has("error") ||
+    url.searchParams.has("error_description");
+  if (request.method === "GET" && isOAuthCallback) {
     try { return await handleCallback(request); }
     catch (error) {
       console.error(error);
