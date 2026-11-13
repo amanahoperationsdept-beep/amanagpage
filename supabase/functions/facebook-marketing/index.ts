@@ -16,7 +16,7 @@ type GraphAsset = {
 const corsHeaders = {
   "Access-Control-Allow-Origin": SITE_ORIGIN,
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Vary": "Origin",
 };
 
@@ -59,6 +59,12 @@ async function decryptToken(ciphertext: string, ivText: string) {
   const key = await encryptionKey();
   const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: decodeBase64(ivText) }, key, decodeBase64(ciphertext));
   return new TextDecoder().decode(plain);
+}
+function isMissingFacebookTable(error: unknown) {
+  const value = error as { code?: string; message?: string };
+  const message = String(value?.message || error || "");
+  return value?.code === "42P01" || value?.code === "PGRST205" ||
+    /facebook_(oauth_states|page_connections).*does not exist|could not find the table .*facebook_(oauth_states|page_connections)/i.test(message);
 }
 function serviceClient() {
   const keys = JSON.parse(required("SUPABASE_SECRET_KEYS"));
@@ -370,7 +376,15 @@ async function handleCallback(request: Request) {
 Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const url = new URL(request.url);
-  if (request.method === "GET" && url.searchParams.get("action") === "callback") {
+  // Meta redirects the browser to this function with an authorization code
+  // (or an OAuth error). Accept the callback even if a configured redirect URI
+  // accidentally omits ?action=callback; handleCallback still validates the
+  // one-time, expiring OAuth state before exchanging any code or saving tokens.
+  const isOAuthCallback = url.searchParams.get("action") === "callback" ||
+    url.searchParams.has("code") ||
+    url.searchParams.has("error") ||
+    url.searchParams.has("error_description");
+  if (request.method === "GET" && isOAuthCallback) {
     try { return await handleCallback(request); }
     catch (error) {
       console.error(error);
@@ -573,6 +587,12 @@ Deno.serve(async (request: Request) => {
     return json({ error: "Unknown Facebook Marketing action." }, 400);
   } catch (error) {
     console.error("Facebook Marketing request failed:", error);
+    if (isMissingFacebookTable(error)) {
+      return json({
+        error: "Facebook Marketing database setup is incomplete. Apply supabase/migrations/202611110001_facebook_marketing.sql in the linked Supabase project, then retry.",
+        code: "FACEBOOK_DATABASE_MIGRATION_REQUIRED",
+      }, 503);
+    }
     const message = error instanceof Error ? error.message : "Facebook Marketing request failed.";
     const status = /sign in|session|authorized|administrator/i.test(message) ? 401 : 500;
     return json({ error: message }, status);
