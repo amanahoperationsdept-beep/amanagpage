@@ -1475,8 +1475,16 @@
         },
         body: JSON.stringify(Object.assign({ action: action }, payload || {}))
       });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || result.error) throw new Error(result.error || ('Facebook service returned HTTP ' + response.status));
+      const responseText = await response.text();
+      let result = {};
+      if (responseText) {
+        try { result = JSON.parse(responseText); }
+        catch (_) { result = { error: responseText.slice(0, 400) }; }
+      }
+      if (!response.ok || result.error) {
+        const detail = result.error || ('Facebook service returned HTTP ' + response.status);
+        throw new Error(detail + (response.status ? ' (HTTP ' + response.status + ')' : ''));
+      }
       return result;
     }
 
@@ -1486,19 +1494,25 @@
       if (!badge || !select) return;
       badge.textContent = 'Checking connection…';
       badge.className = 'inline-flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-full bg-blue-50 text-blue-800 border border-blue-200';
-      const result = await invokeFacebookMarketing('status');
-      const selected = select.value;
-      select.replaceChildren();
-      if (!result.pages || result.pages.length === 0) {
-        select.add(new Option('No connected Pages yet', ''));
-        badge.textContent = 'Not connected';
-        badge.className = 'inline-flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-full bg-amber-50 text-amber-800 border border-amber-200';
-        return;
+      try {
+        const result = await invokeFacebookMarketing('status');
+        const selected = select.value;
+        select.replaceChildren();
+        if (!result.pages || result.pages.length === 0) {
+          select.add(new Option('No connected Pages yet', ''));
+          badge.textContent = 'Not connected';
+          badge.className = 'inline-flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-full bg-amber-50 text-amber-800 border border-amber-200';
+          return;
+        }
+        result.pages.forEach(page => select.add(new Option(page.page_name + ' (' + page.page_id + ')', page.page_id)));
+        if (result.pages.some(page => page.page_id === selected)) select.value = selected;
+        badge.textContent = result.pages.length + ' Page' + (result.pages.length === 1 ? '' : 's') + ' connected';
+        badge.className = 'inline-flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200';
+      } catch (error) {
+        badge.textContent = 'Connection check failed';
+        badge.className = 'inline-flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-full bg-red-50 text-red-800 border border-red-200';
+        showFacebookStatus(error && error.message ? error.message : 'Could not check the Facebook Page connection.', false);
       }
-      result.pages.forEach(page => select.add(new Option(page.page_name + ' (' + page.page_id + ')', page.page_id)));
-      if (result.pages.some(page => page.page_id === selected)) select.value = selected;
-      badge.textContent = result.pages.length + ' Page' + (result.pages.length === 1 ? '' : 's') + ' connected';
-      badge.className = 'inline-flex items-center gap-2 text-xs font-bold px-3 py-2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200';
     }
 
     async function connectFacebookPage() {
